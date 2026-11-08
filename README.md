@@ -38,13 +38,9 @@ component from another system.
 - **Headless-first.** The device needs no screen, launcher or Settings app. ADB and the web UI are
   the setup and rescue paths; every control is a file in `etc/` or a command in `bin/`, so nothing
   lives only in an app's UI. The tree keeps working with the screen off.
-- **No dependence on the Android surface.** The target is a device that dn-cluster has already
-  turned into a **node** (grounds G48/G49): stock firmware, then the consumer surface removed over
-  adb -- launcher, keyboard, Settings, SystemUI, telephony, Bluetooth, WebView, media and other
-  providers -- with a small device owner providing HOME and policy, the screen off, and a master
-  controlling it over ADB. On the reference node that is about 52 packages. openar therefore
-  assumes none of them exists: ADB + the web UI are the only surfaces, every page degrades when its
-  data source is gone, and state lives in files, never in an app sandbox.
+- **No dependence on the Android surface.** It runs on any supported device, but the floor is
+  that the management layer needs no Android UI: no Settings, launcher or SystemUI. The same tree
+  runs on a trimmed node; details in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## What works
 
