@@ -1,0 +1,5 @@
+# Hotspot intent file, read by bin/openar-hotspot (root only).
+# Copy to etc/hotspot.conf (the copy wins) and set a real passphrase (8+ characters).
+ssid="openar"
+pass=""
+band="2"

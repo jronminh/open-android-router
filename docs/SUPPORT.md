@@ -104,6 +104,12 @@ fail, so the Sharp/S21 results are the ones that count.
   owner's own package is protected by the framework and will refuse.
 - SIM values are `getprop` strings and vary: dual-SIM builds return comma-separated lists (the S21
   reports `LOADED,ABSENT`), a trimmed node may report `ABSENT`.
+- Hotspot is root-only (`cmd wifi start-softap` is root-gated) and needs `etc/hotspot.conf`; an
+  open network is refused. `-b any` is rejected on the S21 build until the country is known
+  ("Soft AP failed to start"), so `band="any"` tries 2 then 5. Start/stop verified on the S21:
+  `swlan0` came up at 192.168.241.89, then stopped; Wi-Fi was restored to its previous state.
+- APN uses the telephony content provider; a trimmed node without it (Sharp) prints the provider
+  error, the S21 returns `name=VIETTEL Email, apn=v-internet` (the preferred APN of that SIM).
 - `dumpsys` field names differ by vendor/version; blocks print `n/a` instead of pretending.
 - Clients = the ARP/ND neighbour table (`ip neigh`); Android does not export DHCP leases to a
   shell, so a client appears after its first packet and IPv6 neighbours are listed too.

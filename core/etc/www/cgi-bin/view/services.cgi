@@ -5,7 +5,7 @@
 OPENAR_ROOT=${OPENAR_ROOT:-$(cd "$(dirname "$0")/../../../.." && pwd)}
 . "$OPENAR_ROOT/bin/openar-web-lib"
 READONLY="status check"
-ACT="apply airplane-toggle"
+ACT="apply airplane-toggle disable"
 
 page_head "Services"
 tab=$(tab_current)

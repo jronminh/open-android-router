@@ -8,7 +8,7 @@ OPENAR_ROOT=${OPENAR_ROOT:-$(cd "$(dirname "$0")/../../../.." && pwd)}
 . "$OPENAR_ROOT/lib/openar-commands.sh"
 openar_conf
 BB=$(openar_busybox)
-ACT_VERBS="apply airplane-toggle"
+ACT_VERBS="apply airplane-toggle disable"
 
 deny() { page_head "Denied"; alert error "Denied" "$(print -nr -- "$1" | esc)"; page_foot; exit 0; }
 host_of() { print -nr -- "$1" | sed -E 's#^[a-z]+://##; s#[/:].*$##'; }

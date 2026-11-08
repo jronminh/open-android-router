@@ -32,3 +32,4 @@ pkg-state	System	view	-	15	^[A-Za-z0-9_.]{3,120}$	Package state (installed/disab
 pkg-disable	System	act	yes	20	^[A-Za-z0-9_.]{3,120}$	Disable a package (per user 0)	openar-pkg disable
 pkg-enable	System	act	yes	20	^[A-Za-z0-9_.]{3,120}$	Enable a package	openar-pkg enable
 pkg-stop	System	act	yes	20	^[A-Za-z0-9_.]{3,120}$	Force-stop a package	openar-pkg stop
+apn	Network	view	-	20	-	Preferred APN (name/apn)	content query --uri content://telephony/carriers/preferapn --projection name:apn 2>&1 | head -3

@@ -118,7 +118,8 @@ start per call (the SMS query is ~1.3 s for that reason).
 
 A service is a script `bin/openar-<name>` with a `VERBS="..."` line and one `svc_<verb>` function
 per verb (`lib/openar-service.sh`). Core ships `web`, `tether`, `radio`, `battery`, `wifi`,
-`adb` (rescue settings) and `otablock` (`etc/otablock.list` intent file). Read-only verbs are `status` (key=value lines) and `check`
+`adb` (rescue settings), `otablock` (`etc/otablock.list`) and `hotspot` (root-only, `cmd wifi
+start-softap`, `etc/hotspot.conf`). Read-only verbs are `status` (key=value lines) and `check`
 (exit 0 means "in line with intent", otherwise it prints `diff ...`). The services page lists every
 such script, loads `status`/`check` through `block.cgi?s=&v=`, and turns act verbs listed in
 `ACT_VERBS` into POST buttons to the act zone. Core ships `tether`, `radio`, `battery`, `wifi`

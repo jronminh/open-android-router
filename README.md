@@ -68,6 +68,11 @@ component from another system.
 - **ADB rescue and OTA block services**: `openar-adb` keeps ADB on with no authorization timeout
   (the headless rescue path); `openar-otablock` disables the packages listed in
   `etc/otablock.list` (empty by default; device packs ship the vendor list). Both work rootless.
+- **Hotspot (root)**: `openar-hotspot` starts/stops a WPA2 softap from `etc/hotspot.conf`
+  (`ssid`, `pass`, `band`); an open network is refused, and `band="any"` falls back to 2 then 5
+  because this build rejects `-b any` before the country is known.
+- **APN**: the preferred APN (`name`, `apn`) through the telephony provider; a trimmed node without
+  that provider reports the provider error instead of pretending.
 - **Boot persistence (root)**: `deploy.sh --root` installs `/data/adb/service.d/openar-web.sh`, so
   the web UI comes back after a reboot or power loss. `--no-boot` skips it.
 - **No root needed** for: serving the UI, reading status, clients, traffic, mobile data *state*,

@@ -1,0 +1,46 @@
+#!/system/bin/sh
+# openar-hotspot -- the Wi-Fi hotspot (root only: `cmd wifi start-softap` is root-gated).
+# Intent file etc/hotspot.conf: ssid="openar", pass="<8+ chars>", band="any|2|5".
+# status is readable everywhere; apply/disable refuse fast (exit 3) for uid shell.
+OPENAR_ROOT=${OPENAR_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
+. "$OPENAR_ROOT/lib/openar-platform.sh"
+. "$OPENAR_ROOT/lib/openar-service.sh"
+VERBS="status apply disable"
+ssid="openar"; pass=""; band="2"
+CONF=$(intent hotspot.conf)
+[ -f "$CONF" ] && . "$CONF"
+svc_status() {
+    kv ssid "$ssid"
+    kv configured "$([ -n "$pass" ] && echo yes || echo no)"
+    kv swlan0_ip "$(oip swlan0)"
+    kv tethered "$(dumpsys tethering 2>/dev/null | grep -c 'swlan0')"
+    if [ "$(id -u)" = 0 ]; then kv control root; else kv control "root required"; fi
+}
+svc_apply() {
+    [ "$(id -u)" = 0 ] || { say "hotspot needs root (cmd wifi is root-gated)"; return 3; }
+    [ -f "$CONF" ] || { say "missing etc/hotspot.conf (copy hotspot.conf.example)"; return 2; }
+    [ -n "$pass" ] || { say "no passphrase: refusing an open hotspot"; return 2; }
+    [ "${#pass}" -ge 8 ] || { say "passphrase must be at least 8 characters"; return 2; }
+    # This build rejects "-b any" when the country is not known yet (measured 2026-11-08:
+    # "Soft AP failed to start"); a concrete band works. "any" means try 2 then 5.
+    case "$band" in 2|5) bands="$band" ;; any) bands="2 5" ;; *) bands="2" ;; esac
+    started=""
+    for b in $bands; do
+        cmd wifi start-softap "$ssid" wpa2 "$pass" -b "$b" >/dev/null 2>&1
+        i=0
+        while [ $i -lt 8 ]; do
+            [ -n "$(oip swlan0)" ] && { started=1; break; }
+            sleep 1; i=$((i + 1))
+        done
+        [ -n "$started" ] && break
+        cmd wifi stop-softap >/dev/null 2>&1
+    done
+    [ -n "$started" ] || { say "start-softap failed (bands: $bands)"; return 1; }
+    say "hotspot started: $ssid ($(oip swlan0))"
+}
+svc_disable() {
+    [ "$(id -u)" = 0 ] || { say "hotspot needs root (cmd wifi is root-gated)"; return 3; }
+    cmd wifi stop-softap || { say "stop-softap failed"; return 1; }
+    say "hotspot stopped"
+}
+openar_dispatch "$@"
