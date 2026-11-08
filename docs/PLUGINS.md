@@ -8,7 +8,7 @@ this tree is. Measured on a SHARP 701SH (Android 10, rootless) in 2026-11-08.
 
 | layer | mechanism | reusable on Android? |
 |---|---|---|
-| **packages / feeds** | `opkg` + `.ipk` (tar + control scripts), feeds of prebuilt musl binaries, `/etc/init.d` scripts, uci config | **No.** Binaries are OpenWrt/musl + bionic-incompatible, paths assume `/etc/init.d`, `/usr/lib`, uci and procd. `opkg` itself can be built, but it would only manage our own shell files -- a tarball + manifest does that in a fraction of the code |
+| **packages / feeds** | `opkg` + `.ipk` (tar + control scripts), feeds of prebuilt musl binaries, `/etc/init.d` scripts, uci config | **Not directly.** Paths assume `/etc/init.d`, `/usr/lib`, uci and procd. Static musl binaries do run (LIBC.md); a dynamically linked one needs its own loader path, and a `.so` cannot cross into a bionic process. `opkg` itself can be built, but it would only manage our own shell files -- a tarball + manifest does that in a fraction of the code |
 | **LuCI apps** | `luci-app-*`: Makefile + `menu.d/*.json` + `rpcd/acl.d/*.json` + ucode controller + JS view | **No, not cheaply.** The JSON files are inert without uhttpd + ucode + rpcd + ubus + uci + the LuCI client runtime; that is the full stack, weeks of work (see OPENWRT.md) |
 | **daemon plugin ABI** | uhttpd `plugin.c` (`dlopen` + dispatch table), rpcd `plugin.c` (ubus methods + ACL), netifd protocol handlers | **No.** Each is tied to the daemon it plugs into, and those daemons are not ported |
 | **shell / init plugins** | `rc.common` + `/etc/init.d` + jshn/procd triggers | **Partly.** `rc.common` runs on mksh (tested). Anything using `procd_*` needs jshn + `ubus` + procd, which Android does not have |
@@ -43,9 +43,10 @@ any core file.
 
 ## What a plugin can and cannot be
 
-Can: status blocks, commands, services (`status/check/apply`), CGI pages, CSS/JS assets, help text.
-Cannot: native binaries (bionic ABI, SELinux), LuCI/ucode JS apps, ubus RPC, anything that assumes
-`/etc/init.d`, uci or procd.
+Can: status blocks, commands, services (`status/check/apply`), CGI pages, CSS/JS assets, help text,
+and native payloads that are **static musl** (they run as-is). Dynamic musl payloads need a loader
+wrapper, and a `.so` plugin only works inside a host that is itself musl (no cross-libc `dlopen`).
+Cannot: LuCI/ucode JS apps, ubus RPC, anything that assumes `/etc/init.d`, uci or procd.
 
 Security: a plugin is shell code running as the tree's user (shell, or root in root mode). Therefore
 installation stays **owner-initiated over ADB**; no upload from the web, no network feed in v1.
