@@ -123,6 +123,7 @@ docs/        ARCHITECTURE.md
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): layers, modes, capability matrix, security model.
 - [docs/OPENWRT.md](docs/OPENWRT.md): what of OpenWrt runs on Android as-is, what needs a port, what not to carry over.
 - [docs/PLUGINS.md](docs/PLUGINS.md): why OpenWrt's plugin ecosystem does not transplant, and the file-based plugin model this tree can grow.
+- [docs/OPENWRT-TREE.md](docs/OPENWRT-TREE.md): OpenWrt rootfs layout vs ours, the absolute-path wall, and the L0-L2 adoption plan.
 - [devices/generic/README.md](devices/generic/README.md): what a device pack can override.
 
 ## License
