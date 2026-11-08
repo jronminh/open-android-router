@@ -1,0 +1,56 @@
+name: checks
+
+# Host-side only: a real device is needed for the floor check (tools/check.sh), so CI proves the
+# tree builds and every script parses; the device checks stay in the definition of done.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  syntax:
+    name: scripts parse (sh -n)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: sh -n on every script with a shebang
+        run: |
+          fail=0
+          for f in $(git ls-files); do
+            [ -f "$f" ] || continue
+            head -n 1 "$f" | grep -q '^#!' || continue
+            if sh -n "$f" 2>/dev/null; then :; else echo "SYNTAX FAIL: $f"; fail=1; fi
+          done
+          [ "$fail" = 0 ] && echo "all scripts parse"
+          exit $fail
+
+  build:
+    name: build_tree.sh generic
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: build the runnable tree
+        run: |
+          sh tools/build_tree.sh generic
+          cat out/generic/VERSION
+          test -f out/generic/etc/commands.default
+          test -f out/generic/lib/openar-platform.sh
+          test -x out/generic/bin/openar-web
+          test -f out/generic/etc/www/cgi-bin/view/status.cgi
+      - name: shims are created at deploy, not at build
+        run: test ! -e out/generic/bin/busybox && echo "no busybox in the tree, as intended (GPL-2.0)"
+
+  secrets:
+    name: no operator material committed
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: check for keys, logs and the owner config
+        run: |
+          fail=0
+          for f in core/etc/httpd.conf core/etc/web.conf core/bin/busybox; do
+            [ -f "$f" ] && { echo "must not be committed: $f"; fail=1; }
+          done
+          git grep -n -I -E 'BEGIN (RSA|OPENSSH|PRIVATE) KEY|gh[pousr]_[A-Za-z0-9]{20,}' -- . && fail=1
+          [ "$fail" = 0 ] && echo "no operator material"
+          exit $fail
