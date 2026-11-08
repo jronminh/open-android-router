@@ -81,6 +81,24 @@ component from another system.
   hotspot (`cmd wifi start-softap` is root-only), and the friendly DNS name. These refuse fast with
   exit 3 instead of hanging.
 
+## Screenshots
+
+One tree, two modes. Root mode on the S21 FE (Android 15, Magisk) and the same pages served
+rootless on the Sharp 701SH (Android 10):
+
+![Status page](docs/screenshots/status.png)
+
+| Commands | Services |
+|---|---|
+| ![Commands page](docs/screenshots/commands.png) | ![Services page](docs/screenshots/services.png) |
+
+| Logs | The same tree, rootless |
+|---|---|
+| ![Logs page](docs/screenshots/logs.png) | ![Status page in shell mode](docs/screenshots/status-shell.png) |
+
+Captured with a headless Chromium against a live device; the pages are a view over the command
+line, so nothing in them is a mock-up. IP and MAC addresses are masked.
+
 ## Modes
 
 | | root (Magisk or similar) | plain shell (no root) |
