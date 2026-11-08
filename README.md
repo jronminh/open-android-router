@@ -7,12 +7,24 @@ Status: **0.1, early**. The tree came out of a personal Android router project; 
 keeps only the device-agnostic parts: web UI, native command layer, platform layer, deployment and
 checks. Device specifics live in `devices/`.
 
+## Platform support
+
+| axis | supported |
+|---|---|
+| ROM family | **One UI** (Samsung stock) and **AOSP-based** Android builds; custom ROMs are untested |
+| Android | **6.0 (API 23) and newer**; verified on 10, 12 and 15 -- see [docs/SUPPORT.md](docs/SUPPORT.md) |
+| modes | **rootless** `adb shell` (the floor) and **root via Magisk** only |
+| architecture | any, as long as the operator-supplied busybox matches the device (arm64 tested) |
+
+Other `su` implementations and custom ROMs are out of scope for now: the tree assumes the
+framework commands and the security model of stock One UI / AOSP-based builds.
+
 ## What works
 
 - **Status page**: device, battery, network interfaces, cellular signal, and the web service
   itself. Each block is a file in `core/etc/status.d/`; add or remove files to add or remove blocks.
-- **Commands page**: a vetted list of native Android commands (`settings`, `svc`, `cmd`, `ip`,
-  `dumpsys`, ...) with a per-command parameter regex, timeout and 512 KB output cap. Read-only
+- **Commands page**: a vetted list of native Android commands (`settings`, `svc`, `pm`, `am`,
+  `dumpsys`, `ip`, ...) with a per-command parameter regex, timeout and 512 KB output cap. Read-only
   commands run on demand; "act" commands change state through a POST zone with a second
   confirmation and a log line per run.
 - **Logs page**: actions, web supervisor, openar log, crash buffer.

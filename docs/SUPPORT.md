@@ -3,12 +3,25 @@
 The floor is a **capability contract**, not a version number, but the version target is
 **Android 6.0 (API 23)**.
 
+## Platform scope
+
+| axis | supported | notes |
+|---|---|---|
+| ROM family | **One UI** (Samsung stock) and **AOSP-based** builds | custom ROMs (LineageOS et al.) are untested; vendor `dumpsys` fields may differ |
+| Android | **6.0+** | verified 10, 12, 15; 6.0-9 expected, not verified |
+| security mode | rootless shell, or root via **Magisk** | other `su` implementations are unsupported: paths and permission model differ |
+| CPU | any | busybox must match the device; aarch64 tested |
+
+Scope changes only with evidence: a new ROM family or a 6.0/7.0 device must pass
+`tools/check.sh` before it appears in the verified table.
+
 ## What "supported" means
 
 A device is supported only when both pass on that device:
 
-1. `tools/deploy.sh <serial> --shell` installs and starts.
-2. `tools/check.sh <serial> --mode shell` prints `result: PASS`.
+1. `tools/deploy.sh <serial> --shell` installs and starts (a rooted device also runs
+   `--root`, and must pass both).
+2. `tools/check.sh <serial> --mode shell` prints `result: PASS` (likewise `--mode root`).
 
 The check verifies the busybox shims, the web pages, a status block and one command. A device
 that fails one item is listed as unsupported with the reason, not "mostly working".

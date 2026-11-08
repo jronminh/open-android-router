@@ -8,6 +8,8 @@ the workflow contract, kept short. Change it when the way we work changes.
 - One shell tree (`core/`) that turns an Android phone into a small network device with a web UI.
 - Two modes from one tree: **root** and **plain shell**. The plain shell is the floor.
 - Device specifics belong in `devices/<name>/`; `core/` stays device-agnostic.
+- Scope: **One UI and AOSP-based Android 6.0+**, rootless (the floor) or root via **Magisk** only.
+  Custom ROMs and other `su` implementations are out of scope until a device proves otherwise.
 - The original personal repository is the origin story, not a dependency. Never copy its device
   secrets, keys or evidence into here.
 
