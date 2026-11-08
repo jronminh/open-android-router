@@ -1,0 +1,34 @@
+#!/system/bin/sh
+# openar-pkg -- package state and control for the command list (uid shell can do this over adb).
+#   openar-pkg state <package>        installed / disabled
+#   openar-pkg disable|enable <pkg>   pm disable-user --user 0 / pm enable
+#   openar-pkg stop <pkg>             am force-stop
+# A short deny list refuses the packages that would cut the rescue path itself.
+case "${1:-}" in
+    state|disable|enable|stop) ;;
+    *) echo "usage: openar-pkg state|disable|enable|stop <package>" >&2; exit 64 ;;
+esac
+pkg=${2:-}
+print -nr -- "$pkg" | grep -Eqx '[A-Za-z0-9_.]{3,120}' || { echo "invalid package name"; exit 2; }
+case "$pkg" in
+    android|com.android.shell)
+        echo "$pkg refused: disabling it would cut the ADB rescue path"; exit 3 ;;
+esac
+disabled=0
+pm list packages -d 2>/dev/null | grep -qx "package:$pkg" && disabled=1
+case "$1" in
+    state)
+        installed=0
+        pm list packages 2>/dev/null | grep -qx "package:$pkg" && installed=1
+        echo "package=$pkg installed=$installed disabled=$disabled" ;;
+    disable)
+        [ "$disabled" = 1 ] && { echo "$pkg already disabled"; exit 0; }
+        pm disable-user --user 0 "$pkg" >/dev/null 2>&1 && { echo "$pkg disabled"; exit 0; }
+        echo "$pkg cannot be disabled (device owner? protected?)"; exit 1 ;;
+    enable)
+        pm enable "$pkg" >/dev/null 2>&1 && { echo "$pkg enabled"; exit 0; }
+        echo "$pkg cannot be enabled"; exit 1 ;;
+    stop)
+        am force-stop "$pkg" >/dev/null 2>&1 && { echo "$pkg stopped"; exit 0; }
+        echo "$pkg cannot be stopped"; exit 1 ;;
+esac

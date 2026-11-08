@@ -26,3 +26,9 @@ uptime	System	auto	-	10	-	Uptime and load	uptime
 disk	System	auto	-	10	-	Space used on /data	df -h /data
 top	System	view	-	15	-	Top CPU processes	top -b -n 1 | head -12
 reboot	System	act	yes	15	-	Reboot the device	svc power reboot
+packages	System	auto	-	10	-	Installed / disabled packages	printf 'installed='; pm list packages 2>/dev/null | wc -l; printf 'disabled='; pm list packages -d 2>/dev/null | wc -l
+sim	System	auto	-	10	-	SIM and operator	printf 'sim_state='; getprop gsm.sim.state; printf 'operator='; getprop gsm.operator.alpha; printf 'sim_operator='; getprop gsm.sim.operator.alpha
+pkg-state	System	view	-	15	^[A-Za-z0-9_.]{3,120}$	Package state (installed/disabled)	openar-pkg state
+pkg-disable	System	act	yes	20	^[A-Za-z0-9_.]{3,120}$	Disable a package (per user 0)	openar-pkg disable
+pkg-enable	System	act	yes	20	^[A-Za-z0-9_.]{3,120}$	Enable a package	openar-pkg enable
+pkg-stop	System	act	yes	20	^[A-Za-z0-9_.]{3,120}$	Force-stop a package	openar-pkg stop

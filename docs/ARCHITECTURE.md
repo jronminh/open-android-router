@@ -142,6 +142,8 @@ id  section  group(auto|view|act)  confirm  timeout_s  param_regex  description 
 ```
 
 A parameter is appended as one single-quoted word and must match `param_regex`; `-` means none.
+Package control goes through `bin/openar-pkg` (state/disable/enable/stop), which validates the name
+and refuses `android` / `com.android.shell`: disabling either would cut ADB, the rescue path.
 Zones: `view` (web GET) runs auto|view; `act` (web POST) runs act only; `any` (ADB) runs
 everything. Refusal is explicit: unknown id, wrong zone, missing or non-matching parameter all
 return exit 2 with a message. Output is capped at 512 KB; stdout/stderr go through pipes because

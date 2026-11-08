@@ -62,6 +62,9 @@ component from another system.
 - **SMS page**: inbox and sent through Android's SMS content provider, and a one-part send through
   the `isms` binder. Shortcodes (1-5 digits) are refused; the page needs an SMS provider.
 - **Logs page**: actions, web supervisor, openar log, crash buffer.
+- **Package and SIM control**: read a package's state, disable/enable it (`pm disable-user`), or
+  force-stop it (`am force-stop`); a small deny list refuses `android` and `com.android.shell` so
+  the ADB rescue path cannot be cut. SIM state and operator are read from `getprop`.
 - **ADB rescue and OTA block services**: `openar-adb` keeps ADB on with no authorization timeout
   (the headless rescue path); `openar-otablock` disables the packages listed in
   `etc/otablock.list` (empty by default; device packs ship the vendor list). Both work rootless.

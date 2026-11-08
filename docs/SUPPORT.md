@@ -99,6 +99,11 @@ fail, so the Sharp/S21 results are the ones that count.
 - `openar-otablock` reads `etc/otablock.list` (empty on a generic tree; `devices/g990e` ships
   Samsung's two firmware updaters). It uses `pm disable-user` as shell, verified on the S10 with a
   test package; a device owner's own package cannot be disabled this way.
+- Package control (`pkg-state`, `pkg-disable`, `pkg-enable`, `pkg-stop`) works rootless on the
+  tested devices; it refuses `android` and `com.android.shell` so ADB cannot be cut. A device
+  owner's own package is protected by the framework and will refuse.
+- SIM values are `getprop` strings and vary: dual-SIM builds return comma-separated lists (the S21
+  reports `LOADED,ABSENT`), a trimmed node may report `ABSENT`.
 - `dumpsys` field names differ by vendor/version; blocks print `n/a` instead of pretending.
 - Clients = the ARP/ND neighbour table (`ip neigh`); Android does not export DHCP leases to a
   shell, so a client appears after its first packet and IPv6 neighbours are listed too.
