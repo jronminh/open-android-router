@@ -1,0 +1,12 @@
+#!/system/bin/sh
+# openar-wifi -- Wi-Fi client (wlan0) and the hotspot (swlan0) when the vendor provides one.
+OPENAR_ROOT=${OPENAR_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
+. "$OPENAR_ROOT/lib/openar-platform.sh"
+. "$OPENAR_ROOT/lib/openar-service.sh"
+VERBS="status"
+svc_status() {
+    kv wifi_on "$(settings get global wifi_on 2>/dev/null || echo n/a)"
+    kv hotspot_ip "$(oip swlan0)"
+    kv hotspot_tethered "$(dumpsys tethering 2>/dev/null | grep -c 'swlan0')"
+}
+openar_dispatch "$@"

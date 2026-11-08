@@ -95,6 +95,10 @@ fail, so the Sharp/S21 results are the ones that count.
 - No boot persistence without root (shell mode starts over ADB; Magisk service or a boot hook can
   start it on rooted devices).
 - `dumpsys` field names differ by vendor/version; blocks print `n/a` instead of pretending.
+- SMS needs an SMS content provider (the Sharp 701SH has none, the page reports the provider error).
+  One part per message (160 ASCII / 70 non-ASCII); shortcodes (1-5 digits) are refused because
+  Android shows a premium-SMS confirmation dialog for them. The send path is implemented but was not
+  exercised on a live number from this repository.
 - `airplane` uses `settings` + `am broadcast` (no `cmd`); verified on Android 10 (Sharp) and 12 (S10),
   unverified on 13+ where the framework may restrict broadcasts.
 - Friendly names (`names="openar.lan"` in `etc/web.conf`) need root plus Magisk systemless hosts;

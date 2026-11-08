@@ -1,0 +1,24 @@
+#!/system/bin/sh
+# openar-sms -- SMS from the shell (ADB); the web page uses the same library.
+#   openar-sms list [inbox|sent|all] [N]    newest first (default: inbox 20)
+#   openar-sms send <number> <text>         one part; shortcodes are refused
+OPENAR_ROOT=${OPENAR_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
+. "$OPENAR_ROOT/lib/openar-platform.sh"
+. "$OPENAR_ROOT/lib/openar-sms.sh"
+case "${1:-}" in
+    list)
+        box=${2:-inbox}; n=${3:-20}
+        case "$box" in inbox|sent|all) ;; *) echo "usage: openar-sms list [inbox|sent|all] [N]" >&2; exit 64 ;; esac
+        case "$n" in ''|*[!0-9]*) n=20 ;; esac
+        raw=$(sms_raw "$box" "$n" 2>&1); rc=$?
+        [ $rc = 0 ] || { print -r -- "$raw" >&2; exit $rc; }
+        print -r -- "$raw" | awk -v mode=text -v tz="$(sms_tzoff)" "$SMS_AWK" ;;
+    send)
+        [ $# -ge 3 ] || { echo "usage: openar-sms send <number> <text>" >&2; exit 64; }
+        r=$(sms_send "$2" "$3"); rc=$?
+        echo "$r"
+        echo "$(date '+%F %T') sms send to=$2 len=${#3} exit=$rc by=${REMOTE_USER:-adb} from=${REMOTE_ADDR:-local}" >> "$OPENAR_ROOT/var/log/actions.log"
+        olog "sms send to=$2 exit=$rc"
+        exit $rc ;;
+    *) echo "usage: openar-sms list [inbox|sent|all] [N] | send <number> <text>" >&2; exit 64 ;;
+esac

@@ -27,6 +27,11 @@ framework commands and the security model of stock One UI / AOSP-based builds.
   `dumpsys`, `ip`, ...) with a per-command parameter regex, timeout and 512 KB output cap. Read-only
   commands run on demand; "act" commands change state through a POST zone with a second
   confirmation and a log line per run.
+- **Services page**: every `bin/openar-<name>` with a `VERBS=` line is a service; read-only
+  verbs (`status`, `check`) load by themselves, act verbs (`apply`, `airplane-toggle`) go through
+  the act zone with confirmation and logging.
+- **SMS page**: inbox and sent through Android's SMS content provider, and a one-part send through
+  the `isms` binder. Shortcodes (1-5 digits) are refused; the page needs an SMS provider.
 - **Logs page**: actions, web supervisor, openar log, crash buffer.
 - **No root needed** for: serving the UI, reading status, running read-only commands, and most
   `settings`/`svc`/`cmd` actions (ADB shell holds many of those permissions).

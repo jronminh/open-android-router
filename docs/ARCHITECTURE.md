@@ -74,6 +74,24 @@ private DNS are not used by core, because they do not exist on the floor (Androi
   systemless hosts only. The act zone accepts those names as `Host` as well (still safe against
   DNS rebinding: a rebinding page carries the attacker's own name).
 
+## Services
+
+A service is a script `bin/openar-<name>` with a `VERBS="..."` line and one `svc_<verb>` function
+per verb (`lib/openar-service.sh`). Read-only verbs are `status` (key=value lines) and `check`
+(exit 0 means "in line with intent", otherwise it prints `diff ...`). The services page lists every
+such script, loads `status`/`check` through `block.cgi?s=&v=`, and turns act verbs listed in
+`ACT_VERBS` into POST buttons to the act zone. Core ships `tether`, `radio`, `battery`, `wifi`
+and `web`; device packs add more.
+
+## SMS
+
+Read: `content query --uri content://sms/<box>` (no app, no database access). Send: the isms binder,
+transaction 5 (`sendTextForSubscriber`), as uid 2000 -- a root-mode web process uses Magisk
+`su 2000`; a rootless one already is 2000 and passes the text as one argv element (no shell
+re-parsing). One part only (160 ASCII / 70 non-ASCII); shortcodes (1-5 digits) are refused because
+Android shows a premium-SMS confirmation dialog for them. A device without an SMS provider reports
+the provider error instead of showing an empty inbox.
+
 ## Commands
 
 `etc/commands.default` is tab-separated:

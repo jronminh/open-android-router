@@ -1,0 +1,29 @@
+#!/system/bin/sh
+# openar-radio -- cellular radio: registration, LTE signal, carrier bandwidths, airplane mode.
+# IMS is read only when the vendor service exists (Samsung `secims`); otherwise n/a.
+OPENAR_ROOT=${OPENAR_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
+. "$OPENAR_ROOT/lib/openar-platform.sh"
+. "$OPENAR_ROOT/lib/openar-service.sh"
+VERBS="status airplane-toggle"
+svc_status() {
+    r=$(dumpsys telephony.registry 2>/dev/null)
+    kv service "$(echo "$r" | grep -m1 -oE 'mVoiceRegState=[^,]+, mDataRegState=[^,]+' || echo n/a)"
+    kv lte "$(echo "$r" | grep -m1 -oE 'mLte=CellSignalStrengthLte: [^,]*' | tr ' ' '\n' | grep -E '^(rssi|rsrp|rsrq|rssnr|level)=' | tr '\n' ' ' || echo n/a)"
+    kv bandwidths_khz "$(echo "$r" | grep -m1 -oE 'mCellBandwidths=\[[^]]*\]' | cut -d= -f2 || echo n/a)"
+    kv airplane "$(settings get global airplane_mode_on)"
+    kv ims "$(dumpsys secims 2>/dev/null | grep -m1 -oE 'state: \[[A-Z_]+\]' || echo n/a)"
+}
+# airplane-toggle: radios off, wait, on -- the owner's fix when registration gets stuck.
+# Uses settings + broadcast (no `cmd`, which does not exist on the Android 6.0 floor).
+svc_airplane_toggle() {
+    "$OPENAR_ROOT/bin/openar-airplane" enable; sleep 4
+    "$OPENAR_ROOT/bin/openar-airplane" disable
+    i=0
+    while [ $i -lt 60 ]; do
+        s=$(dumpsys telephony.registry 2>/dev/null | grep -m1 -oE 'mDataRegState=[^,]+')
+        [ "$s" = "mDataRegState=0(IN_SERVICE)" ] && break
+        sleep 2; i=$((i + 2))
+    done
+    if [ "$s" = "mDataRegState=0(IN_SERVICE)" ]; then say "data in service after ${i}s"; else say "NOT in service after ${i}s: $s"; return 1; fi
+}
+openar_dispatch "$@"

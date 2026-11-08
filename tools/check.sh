@@ -64,7 +64,9 @@ if [ "$mode" = shell ]; then
     }
     page "web root" "/"
     page "status.cgi" "/cgi-bin/view/status.cgi"
+    page "services.cgi" "/cgi-bin/view/services.cgi"
     page "commands.cgi" "/cgi-bin/view/commands.cgi"
+    page "sms.cgi" "/cgi-bin/view/sms.cgi"
     page "logs.cgi" "/cgi-bin/view/logs.cgi"
     body=""; i=0
     while [ $i -lt 4 ]; do
@@ -95,7 +97,9 @@ else
         }
         page "web root" "/"
         page "status.cgi" "/cgi-bin/view/status.cgi"
+        page "services.cgi" "/cgi-bin/view/services.cgi"
         page "commands.cgi" "/cgi-bin/view/commands.cgi"
+        page "sms.cgi" "/cgi-bin/view/sms.cgi"
         page "logs.cgi" "/cgi-bin/view/logs.cgi"
         body=$(adb -s "$serial" shell "su -c '$BB wget -q -O - --header \"$hdr\" http://$ip:$port/cgi-bin/view/block.cgi?b=10-device'" 2>/dev/null || true)
     fi

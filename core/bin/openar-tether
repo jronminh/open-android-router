@@ -1,0 +1,29 @@
+#!/system/bin/sh
+# openar-tether -- USB tethering (RNDIS), the access floor. Rootless: status works, apply needs the
+# framework to allow `svc usb setFunctions`; root: apply always works.
+OPENAR_ROOT=${OPENAR_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
+. "$OPENAR_ROOT/lib/openar-platform.sh"
+. "$OPENAR_ROOT/lib/openar-service.sh"
+VERBS="status check apply"
+svc_status() {
+    f=$(svc usb getFunctions 2>&1 | head -1)
+    case "$f" in *Error*|*error*|*Exception*|'') f=n/a ;; esac
+    kv usb_functions "$f"
+    kv usb_state "$(getprop sys.usb.state)"
+    kv usb0_ip "$(oip usb0)"
+    kv tethered "$(dumpsys tethering 2>/dev/null | grep -c 'state=TETHERED')"
+}
+svc_check() {
+    rc=0
+    case "$(svc usb getFunctions 2>&1)" in *rndis*) ;; *) echo "diff usb_functions: no rndis"; rc=1 ;; esac
+    [ -n "$(oip usb0)" ] || { echo "diff usb0: no IPv4"; rc=1; }
+    return $rc
+}
+svc_apply() {
+    svc usb setScreenUnlockedFunctions rndis 2>/dev/null
+    case "$(svc usb getFunctions 2>&1)" in
+        *rndis*) say "rndis already active, default set" ;;
+        *) svc usb setFunctions rndis || { say "cannot set usb functions (root needed?)"; return 1; }; say "applied rndis" ;;
+    esac
+}
+openar_dispatch "$@"

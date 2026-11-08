@@ -1,0 +1,13 @@
+#!/system/bin/sh
+# openar-battery -- battery level / status / temperature and vendor charge limit when present.
+OPENAR_ROOT=${OPENAR_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
+. "$OPENAR_ROOT/lib/openar-platform.sh"
+. "$OPENAR_ROOT/lib/openar-service.sh"
+VERBS="status"
+svc_status() {
+    b=$(dumpsys battery 2>/dev/null)
+    for k in level status temperature; do kv "$k" "$(echo "$b" | grep -m1 -E "^  $k:" | awk '{print $2}')"; done
+    kv usb_powered "$(echo "$b" | grep -m1 'USB powered' | awk '{print $3}')"
+    kv protect_battery "$(settings get global protect_battery 2>/dev/null || echo n/a)"
+}
+openar_dispatch "$@"
