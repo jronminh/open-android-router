@@ -30,6 +30,25 @@ Every entry point sets `OPENAR_ROOT` from its own location, so the tree works wh
 copied (`bin/openar-*` -> one level up; `etc/www/cgi-bin/*/*.cgi` -> four levels up), and sources
 `lib/openar-platform.sh`. Deployments may override it with `OPENAR_ROOT` for tests.
 
+## Busybox first
+
+The portability contract is busybox, not toybox. Toybox applets and options change with the AOSP
+version (`cmd` exists only from 7.0, `ip` is not a toybox applet at all, `mktemp`/`top` availability
+varies), so every POSIX tool comes from one busybox through a symlink farm created at deploy:
+
+```
+bin/busybox          the operator's static busybox (GPL-2.0, not shipped in this repo)
+bin/shims/<applet>   symlink -> ../busybox; PATH puts bin/shims first
+```
+
+The shimmed set is fixed and printed by `deploy.sh`: `awk base64 cat cut date df dirname egrep
+fgrep find grep head ip mktemp mkdir mv printf readlink realpath rm sed seq sha256sum sleep sort
+stat tail tar timeout top touch tr uniq wc xargs gzip`.
+
+Deliberately **not** shimmed: `ping` (busybox ping needs root, Android's does not), `sh` (mksh gives
+`print -r`), and the framework commands `getprop settings svc pm am dumpsys logcat`. `cmd` and
+private DNS are not used by core, because they do not exist on the floor (Android 6.0).
+
 ## Modes
 
 `openar-platform.sh` sets `OPENAR_MODE=root` when `id -u` is 0, else `shell`. From it:

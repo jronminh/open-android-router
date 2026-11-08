@@ -38,6 +38,17 @@ fails=0
 say() { printf '%-30s %s\n' "$1" "$2"; }
 say "device" "$serial (uid $uid, mode $mode, $target, port $port)"
 
+# busybox-first: the shims are the portability contract; without them the tree is not supported.
+shim_missing=""
+for a in sed awk ip timeout; do
+    if [ "$mode" = root ]; then
+        adb -s "$serial" shell "su -c 'test -x $target/bin/shims/$a'" 2>/dev/null || shim_missing="$shim_missing $a"
+    else
+        adb -s "$serial" shell "test -x $target/bin/shims/$a" 2>/dev/null || shim_missing="$shim_missing $a"
+    fi
+done
+if [ -n "$shim_missing" ]; then say "busybox shims" "FAIL ($shim_missing)"; fails=$((fails + 1)); else say "busybox shims" "PASS"; fi
+
 if [ "$mode" = shell ]; then
     adb -s "$serial" forward --remove tcp:$forward >/dev/null 2>&1 || true
     adb -s "$serial" forward tcp:$forward tcp:$port >/dev/null

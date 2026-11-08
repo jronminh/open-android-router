@@ -32,11 +32,28 @@ layer, platform layer, deployment and checks. Device specifics live in `devices/
 The capability differences are detected at runtime by `core/lib/openar-platform.sh`; nothing
 in `core/` may assume root. A feature that needs root must say so and degrade cleanly.
 
+## Busybox first (the portability contract)
+
+Toybox applets and their options differ between AOSP versions (`cmd` only exists from Android 7.0,
+`ip` is not even a toybox applet), so the tree does not rely on toybox. POSIX tools come from
+**busybox** through `bin/shims`, a symlink farm created at deploy time:
+
+| layer | source |
+|---|---|
+| POSIX tools | busybox: `sed awk grep ip timeout mktemp top df date tar ...` |
+| framework | system: `getprop settings svc pm am dumpsys logcat` |
+| exceptions | system: `ping` (busybox ping needs root), `sh` (mksh) |
+
+BusyBox is GPL-2.0 and is **not** shipped here. The deploy script uses a busybox already on the
+device, or one you pass with `--busybox PATH`; `tools/get_busybox.sh` pulls Magisk's copy from a
+rooted phone. The floor is **Android 6.0**; see [docs/SUPPORT.md](docs/SUPPORT.md) for exactly what
+has been verified on which device.
+
 ## Quick start (no root)
 
 ```sh
 # from the repo, with a device attached over ADB
-tools/deploy.sh <serial> --shell
+tools/deploy.sh <serial> --shell [--busybox PATH]   # --busybox needed only if the phone has none
 adb -s <serial> shell /data/local/tmp/openar/bin/openar-web start
 adb -s <serial> forward tcp:8080 tcp:8080
 # open http://127.0.0.1:8080/ with the credentials from etc/httpd.conf (admin/admin until changed)

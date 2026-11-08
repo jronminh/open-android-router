@@ -24,6 +24,14 @@ OPENAR_MODE=shell
 OPENAR_LOG=${OPENAR_LOG:-$OPENAR_ROOT/var/log}
 mkdir -p "$OPENAR_LOG" "$OPENAR_ROOT/var/run" "$OPENAR_ROOT/tmp" 2>/dev/null
 
+# POSIX tools come from busybox through bin/shims (created by tools/deploy.sh); the Android
+# framework commands (getprop, settings, svc, pm, am, dumpsys, logcat) stay the system binaries.
+# busybox-first removes the toybox question: applets and options differ between AOSP versions.
+# ping is deliberately not shimmed -- busybox ping needs root, Android's ping does not.
+OPENAR_SHIMS=$OPENAR_ROOT/bin/shims
+PATH=$OPENAR_SHIMS:$OPENAR_ROOT/bin:/system/bin:/system/xbin
+export PATH
+
 # Kernel log only when the kernel lets us write it: rootless "echo > /dev/kmsg" is a hard error
 # printed on stderr by the shell itself (measured on Sharp 701SH, 2026-11-08).
 olog() {

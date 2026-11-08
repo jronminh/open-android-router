@@ -6,6 +6,6 @@ kv "usb0 (USB tether)" "ip -4 -o addr show usb0 2>/dev/null | awk '{print \$4}' 
 kv "swlan0 (hotspot)" "ip -4 -o addr show swlan0 2>/dev/null | awk '{print \$4}' | grep . || echo 'not available'"
 kv "wlan0 (Wi-Fi client)" "ip -4 -o addr show wlan0 2>/dev/null | awk '{print \$4}' | grep . || echo 'not available'"
 kv "rmnet0 (mobile)" "ip -4 -o addr show rmnet0 2>/dev/null | awk '{print \$4}' | grep . || echo 'not available'"
-kv "Voice / data" "dumpsys telephony.registry 2>/dev/null | grep -m1 -oE 'mVoiceRegState=[^,]+, mDataRegState=[^,]+'"
+kv "Voice / data" "dumpsys telephony.registry 2>/dev/null | grep -m1 -oE 'mVoiceRegState=[^,]+, mDataRegState=[^,]+' || echo n/a"
 kv "USB state" "getprop sys.usb.state"
 table_end; section_end

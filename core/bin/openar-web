@@ -96,7 +96,8 @@ do_start() {
     if alive "$(get supervisor.pid)"; then echo "openar-web: already running (pid $(get supervisor.pid))"; return 0; fi
     [ -n "$OPENAR_IFACES" ] || { echo "openar-web: no interfaces configured (etc/web.conf: ifaces=...)" >&2; exit 1; }
     for i in $OPENAR_IFACES; do rm -f "$RUN/$i".*; done
-    setsid "$0" --loop < /dev/null > /dev/null 2>&1 &
+    # busybox setsid: the system one is missing on old Android (the floor is 6.0).
+    "$BB" setsid "$0" --loop < /dev/null > /dev/null 2>&1 &
     sleep 1; echo "openar-web: started (pid $(get supervisor.pid))"
 }
 

@@ -50,11 +50,12 @@ cmd_run() {
     # "cmd"/"settings" pass their fds to system_server over binder and SELinux denies
     # system_server our files (adb_data_file -> "Failed transaction"); pipes are fine.
     set -o pipefail
-    ( PATH=$OPENAR_ROOT/bin:/system/bin:/system/xbin timeout "$c_timeout" sh -c "$r_cmdline" 2>&1 1>&3 3>&- | cat > "$e" ) 3>&1 | cat > "$o"
+    ( PATH=$OPENAR_SHIMS:$OPENAR_ROOT/bin:/system/bin:/system/xbin timeout "$c_timeout" sh -c "$r_cmdline" 2>&1 1>&3 3>&- | cat > "$e" ) 3>&1 | cat > "$o"
     r_rc=$?
     set +o pipefail
     r_out=$(head -c $CAP "$o"); r_err=$(head -c $CAP "$e"); rm -f "$o" "$e"
-    [ "$r_rc" = 124 ] && r_err="$r_err
+    case "$r_rc" in 124|137|143) r_rc_msg="timed out" ;; *) r_rc_msg="" ;; esac
+    [ -n "$r_rc_msg" ] && r_err="$r_err
 (timed out after ${c_timeout}s)"
     if [ "$c_group" = act ]; then
         echo "$(date '+%F %T') run $1${3:+ $3} exit=$r_rc by=${REMOTE_USER:-adb} from=${REMOTE_ADDR:-local}" >> "$OPENAR_ROOT/var/log/actions.log"

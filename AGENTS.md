@@ -39,17 +39,22 @@ capability matrix instead of merging it silently.
 ## Hard rules
 
 1. **Rootless floor.** Every page, command and service must work with `adb shell`, or state that it
-   needs root and degrade cleanly. `tools/check.sh --mode shell` must pass.
-2. **No state that exists only in the UI.** Every control maps to a file in `etc/` or a command in
+   needs root and degrade cleanly. `tools/check.sh --mode shell` must pass. The floor is
+   **Android 6.0**; do not add a tool or a flag that only exists in a newer AOSP (no `cmd`,
+   no private DNS in core).
+2. **Busybox first.** POSIX tools come from busybox through `bin/shims` (created by `deploy.sh`);
+   framework commands come from the system. Never call a bare toybox applet in new code, never
+   assume a toybox option, and never commit the busybox binary (GPL-2.0, supplied by the operator).
+3. **No state that exists only in the UI.** Every control maps to a file in `etc/` or a command in
    `bin/`; the web is a view over the command line, never a second implementation.
-3. **Official Android mechanisms only**: `svc`, `settings`, `cmd`, `pm`, `am`, `dumpsys`.
+4. **Official Android mechanisms only**: `svc`, `settings`, `pm`, `am`, `dumpsys`.
    No iptables, no rootfs tricks, no persistent Linux-layer hacks.
-4. **Bind per interface, never 0.0.0.0.** Interfaces and port come from `etc/web.conf`.
-5. **Secrets stay out of git.** Only `*.example` files in `core/etc/`; `etc/httpd.conf` is created on
+5. **Bind per interface, never 0.0.0.0.** Interfaces and port come from `etc/web.conf`.
+6. **Secrets stay out of git.** Only `*.example` files in `core/etc/`; `etc/httpd.conf` is created on
    the device (mode 0600) and never committed.
-6. **The act zone stays small and loud**: POST only, Host and Origin checks, a second confirmation,
+7. **The act zone stays small and loud**: POST only, Host and Origin checks, a second confirmation,
    one log line per run.
-7. **Commands are vetted**: every row has a group, a timeout, a parameter regex and a description.
+8. **Commands are vetted**: every row has a group, a timeout, a parameter regex and a description.
    Read-only commands never get the `act` group.
 
 ## Definition of done

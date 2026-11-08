@@ -1,0 +1,11 @@
+#!/system/bin/sh
+# openar-airplane -- airplane mode for the command list, without "cmd".
+# "cmd" only exists from Android 7.0 (frameworks/native/cmds/cmd appears in that tag); the floor
+# is 6.0, so this uses settings + broadcast, a path that exists since Android 4.
+case "${1:-}" in
+    enable)  on=1; state=true ;;
+    disable) on=0; state=false ;;
+    *) echo "usage: openar-airplane enable|disable" >&2; exit 64 ;;
+esac
+settings put global airplane_mode_on "$on" || exit 1
+am broadcast -a android.intent.action.AIRPLANE_MODE --ez state "$state" >/dev/null 2>&1
