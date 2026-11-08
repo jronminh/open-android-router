@@ -1,7 +1,7 @@
 # Device packs
 
 A device pack is a directory whose `etc/`, `bin/` and `lib/` overlay the tree built from
-`src/`. Use it for what is specific to one phone:
+`core/`. Use it for what is specific to one phone:
 
 - `etc/web.conf` -- which interfaces to serve and the port.
 - `etc/httpd.conf` -- never commit a real password here; the deploy script creates it on the

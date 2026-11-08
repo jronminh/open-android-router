@@ -4,7 +4,7 @@ Copyright (C) 2026 the open-android-router authors
 Licensed under the Apache License, Version 2.0 (see LICENSE).
 
 This product includes the LuCI Bootstrap theme, unmodified, under
-src/etc/www/luci-static/bootstrap/:
+core/etc/www/luci-static/bootstrap/:
   Copyright (C) 2008-2026 OpenWrt.org and contributors
   Licensed under the Apache License, Version 2.0; the license text is kept in that directory.
 

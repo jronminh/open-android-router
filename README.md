@@ -10,7 +10,7 @@ layer, platform layer, deployment and checks. Device specifics live in `devices/
 ## What works
 
 - **Status page**: device, battery, network interfaces, cellular signal, and the web service
-  itself. Each block is a file in `src/etc/status.d/`; add or remove files to add or remove blocks.
+  itself. Each block is a file in `core/etc/status.d/`; add or remove files to add or remove blocks.
 - **Commands page**: a vetted list of native Android commands (`settings`, `svc`, `cmd`, `ip`,
   `dumpsys`, ...) with a per-command parameter regex, timeout and 512 KB output cap. Read-only
   commands run on demand; "act" commands change state through a POST zone with a second
@@ -29,8 +29,8 @@ layer, platform layer, deployment and checks. Device specifics live in `devices/
 | kernel log | yes | no (falls back to `var/log/openar.log`) |
 | durability across reboot | boot hook / Magisk service | none (start it over ADB) |
 
-The capability differences are detected at runtime by `src/lib/openar-platform.sh`; nothing
-in `src/` may assume root. A feature that needs root must say so and degrade cleanly.
+The capability differences are detected at runtime by `core/lib/openar-platform.sh`; nothing
+in `core/` may assume root. A feature that needs root must say so and degrade cleanly.
 
 ## Quick start (no root)
 
@@ -58,10 +58,11 @@ The deploy script copies a `busybox` that already exists on the device (`/data/a
 ## Layout
 
 ```
-src/        the runnable tree: bin/ lib/ etc/ var/
-devices/    per-device packs (extra config, command lists, status blocks)
-tools/      build_tree.sh, deploy.sh, check.sh
-docs/       ARCHITECTURE.md
+core/        the runnable tree: bin/ lib/ etc/ var/
+platform/    deployment defaults per mode: root/ and shell/
+devices/     per-device packs (extra config, command lists, status blocks)
+tools/       build_tree.sh, deploy.sh, check.sh
+docs/        ARCHITECTURE.md
 ```
 
 ## Rules of the project

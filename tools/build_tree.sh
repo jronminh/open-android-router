@@ -1,5 +1,5 @@
 #!/bin/sh
-# build_tree.sh <pack> [outdir] -- materialise the runnable tree: src/ plus devices/<pack>/.
+# build_tree.sh <pack> [outdir] -- materialise the runnable tree: core/ plus devices/<pack>/.
 # The result is a plain directory (bin/ lib/ etc/ var/ home/) that deploy.sh pushes as-is.
 set -eu
 here=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
@@ -7,7 +7,7 @@ pack=${1:-generic}
 out=${2:-$here/out/$pack}
 rm -rf "$out"
 mkdir -p "$out"
-cp -a "$here/src/." "$out/"
+cp -a "$here/core/." "$out/"
 if [ -d "$here/devices/$pack" ]; then
     for d in etc bin lib; do
         if [ -d "$here/devices/$pack/$d" ]; then

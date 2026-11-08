@@ -6,7 +6,7 @@ plus a thin web layer over it. Root is an enhancement, not a requirement.
 ## Layers
 
 ```
-src/                 the runnable tree (deployed as-is to <root>/)
+core/                 the runnable tree (deployed as-is to <root>/)
   bin/openar-web     supervisor: one busybox httpd per interface IP, respawned like procd
   bin/openar-web-lib page frame/widgets (LuCI Bootstrap look)
   bin/openar-cmd     command list from the shell
@@ -17,8 +17,9 @@ src/                 the runnable tree (deployed as-is to <root>/)
   etc/commands.default   the vetted command list
   etc/web.conf.example   interfaces + port (owner copy: etc/web.conf)
   etc/httpd.conf.example Basic auth password (owner copy: etc/httpd.conf)
+platform/<mode>/     deployment defaults (ifaces, port, busybox search) -- see platform/README.md
 devices/<name>/      a device pack: overlays etc/, bin/ or lib/ of the tree
-tools/build_tree.sh  src + devices/<name> -> out/<name>/
+tools/build_tree.sh  core/ + devices/<name> -> out/<name>/
 tools/deploy.sh      build, push, keep owner config, set first-run files
 tools/check.sh       the floor check: pages, a status block, one command
 ```
@@ -80,7 +81,7 @@ a second POST with `confirm=yes` executes; every act run appends to `var/log/act
 ## Adding a device
 
 1. `devices/<name>/` with `etc/` files it wants to change: `web.conf`, `httpd.conf`,
-   `commands`, `status.d/` blocks. Files there overlay `src/`.
+   `commands`, `status.d/` blocks. Files there overlay `core/`.
 2. `tools/build_tree.sh <name>`, `tools/deploy.sh <serial> --pack <name>`.
 3. `tools/check.sh <serial>` must pass before the device is called supported.
 

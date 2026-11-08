@@ -5,9 +5,9 @@ the workflow contract, kept short. Change it when the way we work changes.
 
 ## What this repository is
 
-- One shell tree (`src/`) that turns an Android phone into a small network device with a web UI.
+- One shell tree (`core/`) that turns an Android phone into a small network device with a web UI.
 - Two modes from one tree: **root** and **plain shell**. The plain shell is the floor.
-- Device specifics belong in `devices/<name>/`; `src/` stays device-agnostic.
+- Device specifics belong in `devices/<name>/`; `core/` stays device-agnostic.
 - The old personal S21Net repository is the origin story, not a dependency. Never copy its
   device secrets, keys or evidence into here.
 
@@ -45,7 +45,7 @@ capability matrix instead of merging it silently.
 3. **Official Android mechanisms only**: `svc`, `settings`, `cmd`, `pm`, `am`, `dumpsys`.
    No iptables, no rootfs tricks, no persistent Linux-layer hacks.
 4. **Bind per interface, never 0.0.0.0.** Interfaces and port come from `etc/web.conf`.
-5. **Secrets stay out of git.** Only `*.example` files in `src/etc/`; `etc/httpd.conf` is created on
+5. **Secrets stay out of git.** Only `*.example` files in `core/etc/`; `etc/httpd.conf` is created on
    the device (mode 0600) and never committed.
 6. **The act zone stays small and loud**: POST only, Host and Origin checks, a second confirmation,
    one log line per run.
