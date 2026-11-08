@@ -79,6 +79,7 @@ docs/       ARCHITECTURE.md
 
 ## Documentation
 
+- [AGENTS.md](AGENTS.md): how we work -- environment, floor rules, definition of done.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): layers, modes, capability matrix, security model.
 - [devices/generic/README.md](devices/generic/README.md): what a device pack can override.
 
