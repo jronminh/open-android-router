@@ -1,5 +1,8 @@
 # Plugins
 
+> Research note, not a roadmap. The scope is device capabilities plus the OpenWrt-shaped
+> management layer; the ideas here are recorded in [IDEAS.md](IDEAS.md), not planned.
+
 OpenWrt's reputation comes from its plugin ecosystem more than from the base system. This note
 checks what of that ecosystem can exist on Android, and what the smallest honest plugin model for
 this tree is. Measured on a SHARP 701SH (Android 10, rootless) in 2026-11-08.

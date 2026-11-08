@@ -19,6 +19,20 @@ checks. Device specifics live in `devices/`.
 Other `su` implementations and custom ROMs are out of scope for now: the tree assumes the
 framework commands and the security model of stock One UI / AOSP-based builds.
 
+## Scope (and non-goals)
+
+The project does two things and nothing else:
+
+1. **Expose what the device already has**: tether and interfaces, radios, battery, SMS if the
+   device has a provider -- through one small web UI, with the rootless shell as the floor.
+2. **Keep the management layer OpenWrt-shaped** (service verbs, a vetted command list, status
+   blocks, one password, act zone) because that model is proven for headless boxes.
+
+It is **not** a port of OpenWrt: no `opkg`/`.ipk`, no `uhttpd`/`ubus`/`rpcd`/`procd`/`LuCI`,
+no libc island, no plugin feed. Those are recorded in [docs/IDEAS.md](docs/IDEAS.md) as ideas, not
+planned. New work should add a *device capability* or simplify the *management layer*, not a
+component from another system.
+
 ## What works
 
 - **Status page**: device, battery, network interfaces, cellular signal, and the web service
@@ -125,6 +139,7 @@ docs/        ARCHITECTURE.md
 - [docs/PLUGINS.md](docs/PLUGINS.md): why OpenWrt's plugin ecosystem does not transplant, and the file-based plugin model this tree can grow.
 - [docs/OPENWRT-TREE.md](docs/OPENWRT-TREE.md): OpenWrt rootfs layout vs ours, the absolute-path wall, and the L0-L2 adoption plan.
 - [docs/LIBC.md](docs/LIBC.md): musl/glibc/bionic on Android -- what runs as-is, what needs a loader, and why the shell domain is easier than an app.
+- [docs/IDEAS.md](docs/IDEAS.md): what was investigated and deliberately left out (OpenWrt components, package feed, libc island, plugin installer).
 - [devices/generic/README.md](devices/generic/README.md): what a device pack can override.
 
 ## License

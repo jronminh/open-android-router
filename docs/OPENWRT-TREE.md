@@ -1,5 +1,8 @@
 # OpenWrt tree compatibility
 
+> Research note, not a roadmap. The scope is device capabilities plus the OpenWrt-shaped
+> management layer; the ideas here are recorded in [IDEAS.md](IDEAS.md), not planned.
+
 This is the first compatibility layer: if the tree layout matches OpenWrt's rootfs, scripts and
 plugins land where they expect. Measured against the pinned source in the personal project
 (OpenWrt v25.12.6, `package/base-files`) and on a SHARP 701SH (Android 10, rootless), 2026-11-08.

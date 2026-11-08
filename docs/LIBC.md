@@ -1,5 +1,8 @@
 # libc on Android (musl, glibc, bionic)
 
+> Research note, not a roadmap. The scope is device capabilities plus the OpenWrt-shaped
+> management layer; the ideas here are recorded in [IDEAS.md](IDEAS.md), not planned.
+
 Earlier notes in this repository said "OpenWrt binaries are musl and therefore cannot run on
 Android". That is too coarse. The measured picture (personal notes `deb-native-notes`, and two
 Termux projects) is:

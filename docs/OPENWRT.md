@@ -1,5 +1,8 @@
 # OpenWrt compatibility
 
+> Research note, not a roadmap. The scope is device capabilities plus the OpenWrt-shaped
+> management layer; the ideas here are recorded in [IDEAS.md](IDEAS.md), not planned.
+
 The web UI, the command model and the service model were **modelled on OpenWrt** (LuCI Bootstrap
 theme, busybox httpd, procd respawn policy, rc.common verb dispatch, luci-app-commands). This note
 records what of OpenWrt can run **on Android as-is**, what needs a port, and what should not be

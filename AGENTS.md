@@ -10,6 +10,9 @@ the workflow contract, kept short. Change it when the way we work changes.
 - Device specifics belong in `devices/<name>/`; `core/` stays device-agnostic.
 - Scope: **One UI and AOSP-based Android 6.0+**, rootless (the floor) or root via **Magisk** only.
   Custom ROMs and other `su` implementations are out of scope until a device proves otherwise.
+- Non-goals: porting OpenWrt components (`uhttpd`/`ubus`/`rpcd`/`procd`/`LuCI`), a package
+  feed, a libc island, or a plugin runtime installer. Record such ideas in `docs/IDEAS.md`; do not
+  implement them here. Work adds a *device capability* or simplifies the *management layer*.
 - The original personal repository is the origin story, not a dependency. Never copy its device
   secrets, keys or evidence into here.
 
