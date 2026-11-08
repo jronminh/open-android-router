@@ -2,3 +2,11 @@ out/
 *.tgz
 *.tar.gz
 .DS_Store
+
+# never commit operator material (deploy keeps these on the device, not in git)
+*.keystore
+*.jks
+*.pem
+*.key
+id_rsa*
+*.log
