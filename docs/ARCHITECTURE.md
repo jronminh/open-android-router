@@ -61,12 +61,29 @@ private DNS are not used by core, because they do not exist on the floor (Androi
 | owner config | `etc/web.conf`, `etc/httpd.conf` | same |
 | boot durability | outside this tree (Magisk service / boot hook) | none |
 
-## Runtime boundaries (headless, app-free)
+## Target: a node, not a phone
 
-The tree runs as ordinary shell processes under adbd/init. It deliberately requires no APK of its
-own, no zygote and no WebView: the web UI is static HTML + CGI served by busybox httpd, so it keeps
-answering with the screen off or the app layer broken. This is the rescue invariant: ADB and the
-web UI must not depend on an app we ship.
+The device is expected to be a **dn-cluster node**: stock firmware, then the consumer surface
+removed over adb (G48) -- on the reference 701SH about 52 packages survive, with no launcher,
+keyboard, Settings, SystemUI, telephony, Bluetooth, WebView, MTP, media or contacts provider.
+A small device owner (G49) provides HOME and policy, the screen is off, and a master controls the
+node over ADB.
+
+openar must run in that state:
+
+- ADB + busybox httpd are the only surfaces; no Settings/launcher/WebView to lean on;
+- blocks print `n/a` and commands fail with their own message when the package or service behind
+  them has been trimmed away (SMS needs its provider, IMS needs its vendor service);
+- state lives in `/data` files, never in an app sandbox;
+- early calls must tolerate the framework not being ready: after a reboot adb answers at ~27-30 s,
+  the package manager at ~31-33 s, `sys.boot_completed` at ~35-38 s.
+
+### Runtime boundaries and ART
+
+The tree runs as ordinary shell processes under adbd/init. It ships no APK by default, no zygote
+and no WebView, so the web UI keeps answering with the screen off or the app layer broken. If a
+capability needs an app (device owner, HOME, a policy), the app follows the `nodeapp` shape: a few
+KB, passive, one broadcast command at a time, direct-boot aware -- an actuator, not the product.
 
 "Independent of ART" is not literally true, and the documentation says so. Measured on Sharp
 (Android 10) and S21 (Android 15):

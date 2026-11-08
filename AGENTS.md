@@ -47,10 +47,12 @@ capability matrix instead of merging it silently.
    needs root and degrade cleanly. `tools/check.sh --mode shell` must pass. The floor is
    **Android 6.0**; do not add a tool or a flag that only exists in a newer AOSP (no `cmd`,
    no private DNS in core).
-2. **Headless and app-free.** No APK of ours, no zygote, no WebView, no long-lived app process;
-   ADB + the web UI are the rescue path and must keep working when the app layer is broken. Some
-   framework tools are `app_process`/ART one-shots (`content` always, `svc` on old releases);
-   that is allowed, an app of ours is not.
+2. **Node target.** Assume a device already turned into a dn-cluster node (G48/G49): stock
+   firmware, consumer packages removed over adb (no Settings, launcher, SystemUI, WebView,
+   telephony, media providers), a small device owner for HOME/policy, screen off, master over ADB.
+   Never depend on those packages: ADB + the web UI are the only surfaces, and every block/command
+   degrades to `n/a` when its source is trimmed away. An app is allowed only as a passive actuator
+   when the framework demands one (the `nodeapp` shape), never as the product.
 3. **Busybox first.** POSIX tools come from busybox through `bin/shims` (created by `deploy.sh`);
    framework commands come from the system. Never call a bare toybox applet in new code, never
    assume a toybox option, and never commit the busybox binary (GPL-2.0, supplied by the operator).

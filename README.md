@@ -35,12 +35,20 @@ component from another system.
 
 ## Philosophy
 
-- **Headless-first.** The phone needs no screen, launcher or Settings app. ADB and the web UI are
+- **Headless-first.** The device needs no screen, launcher or Settings app. ADB and the web UI are
   the setup and rescue paths; every control is a file in `etc/` or a command in `bin/`, so nothing
   lives only in an app's UI. The tree keeps working with the screen off.
-- **Outside the app runtime.** There is no APK of ours, no zygote, no WebView and no long-lived app
-  process. The tree is shell scripts plus busybox httpd; if the app layer is broken or was never
-  installed, the web UI and ADB still serve.
+- **A node, not a phone.** The target is a device that dn-cluster has already turned into a
+  **node** (grounds G48/G49): stock firmware, then the consumer surface removed over adb --
+  launcher, keyboard, Settings, SystemUI, telephony, Bluetooth, WebView, media and other
+  providers -- with a small device owner providing HOME and policy, the screen off, and a master
+  controlling it over ADB. On the reference node that is about 52 packages. openar therefore
+  assumes none of them exists: ADB + the web UI are the only surfaces, every page degrades when its
+  data source is gone, and state lives in files, never in an app sandbox.
+- **App only as an actuator.** The default is no APK of ours and no long-lived app process. If a
+  capability exists only behind an app (device owner, HOME, a policy), it follows the `nodeapp`
+  shape: a few KB, passive, one command per broadcast, direct-boot aware, not the product. The
+  product is the tree plus ADB.
 - **Honest about ART.** This is not an "ART-free" claim. `cmd`, `dumpsys`, `logcat`, `getprop`,
   `service`, and (on both tested releases) `settings`/`pm`/`am` are native or thin wrappers around
   native `cmd`. But `content` always runs through `app_process` (ART), and on Android 10 `svc` does
