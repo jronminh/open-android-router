@@ -105,8 +105,9 @@ start per call (the SMS query is ~1.3 s for that reason).
 - `busybox httpd` per interface address from `etc/web.conf`; a supervisor loop keeps them up
   (threshold 3600 s, retry 5, restart after 5 s -- the procd instance policy).
 - HTTP Basic, one password for the whole site, `etc/httpd.conf` outside the docroot, mode 0600.
-- Pages: Status (blocks), Commands (list), Logs. Each page sends its frame immediately; blocks
-  load in parallel through `cgi-bin/view/block.cgi`, like LuCI's "Loading view..." spinner.
+- Pages: Status (blocks), Clients (neighbour table), Services, Commands, SMS, Logs. Each page
+  sends its frame immediately; blocks load in parallel through `cgi-bin/view/block.cgi`, like
+  LuCI's "Loading view..." spinner.
 - The treeless URL `/` is a redirect; `openar.js` fills `data-block`/`data-cmd` placeholders.
 - Optional friendly names (`names="openar.lan"` in `etc/web.conf`) are written as `<ip> <name>`
   lines into the hosts file the tether dnsmasq reads, with a SIGHUP afterwards; root plus Magisk

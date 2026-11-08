@@ -9,7 +9,12 @@
 # no private DNS (Android 9+). Device packs may add those for newer phones.
 ifaces	Network	view	-	10	-	IPv4 addresses of all interfaces	ip -4 -o addr show
 routes	Network	view	-	10	-	Main routing table	ip route
-neigh	Network	view	-	10	-	Link-layer neighbours (devices seen)	ip neigh
+neigh	Network	view	-	10	-	Link-layer neighbours (raw)	ip neigh
+clients	Network	view	-	10	-	Clients seen (neighbour table)	ip neigh
+traffic	Network	auto	-	15	-	Interface counters and rate	openar-traffic
+registration	Network	auto	-	15	-	Voice / data registration	dumpsys telephony.registry 2>/dev/null | grep -m1 -oE 'mVoiceRegState=[^,]+, mDataRegState=[^,]+' || echo n/a
+data-state	Network	auto	-	10	-	Mobile data (1/0)	settings get global mobile_data
+data	Network	act	yes	20	^(enable|disable)$	Mobile data on/off (root)	openar-data
 ping	Network	view	-	15	^[A-Za-z0-9.-]{1,253}$	Ping a host or IPv4 (3 packets)	ping -c 3 -W 2
 tether	Network	auto	-	15	-	Tethered interface count	count=$(dumpsys tethering 2>/dev/null | grep -c 'state=TETHERED'); echo tethered=$count
 usb-state	Network	auto	-	10	-	USB functions / state	getprop sys.usb.state

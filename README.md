@@ -44,8 +44,14 @@ component from another system.
 
 ## What works
 
-- **Status page**: device, battery, network interfaces, cellular signal, and the web service
-  itself. Each block is a file in `core/etc/status.d/`; add or remove files to add or remove blocks.
+- **Status page**: device, battery, network interfaces, cellular signal, traffic counters and the
+  web service itself. Each block is a file in `core/etc/status.d/`; add or remove files to add or
+  remove blocks.
+- **Clients page**: the neighbour table (ARP/ND) with address, interface, MAC and state -- the
+  devices this one has talked to. Android does not export the tether DHCP leases to a shell, so a
+  client appears after its first packet.
+- **Traffic**: per-interface byte counters and rate from `/proc/net/dev` (USB, Wi-Fi, hotspot,
+  Ethernet, mobile data); interfaces with no traffic are hidden.
 - **Commands page**: a vetted list of native Android commands (`settings`, `svc`, `pm`, `am`,
   `dumpsys`, `ip`, ...) with a per-command parameter regex, timeout and 512 KB output cap. Read-only
   commands run on demand; "act" commands change state through a POST zone with a second
@@ -56,8 +62,11 @@ component from another system.
 - **SMS page**: inbox and sent through Android's SMS content provider, and a one-part send through
   the `isms` binder. Shortcodes (1-5 digits) are refused; the page needs an SMS provider.
 - **Logs page**: actions, web supervisor, openar log, crash buffer.
-- **No root needed** for: serving the UI, reading status, running read-only commands, and most
-  `settings`/`svc`/`cmd` actions (ADB shell holds many of those permissions).
+- **No root needed** for: serving the UI, reading status, clients, traffic, mobile data *state*,
+  registration, Wi-Fi on/off (tested), and most `settings` actions.
+- **Root only**: tether `apply`, mobile data on/off (`svc data` hangs for uid shell -- measured),
+  hotspot (`cmd wifi start-softap` is root-only), and the friendly DNS name. These refuse fast with
+  exit 3 instead of hanging.
 
 ## Modes
 

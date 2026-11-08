@@ -20,6 +20,7 @@ svc_check() {
     return $rc
 }
 svc_apply() {
+    [ "$(id -u)" = 0 ] || { say "usb functions need root (shell has no access to svc usb)"; return 3; }
     svc usb setScreenUnlockedFunctions rndis 2>/dev/null
     case "$(svc usb getFunctions 2>&1)" in
         *rndis*) say "rndis already active, default set" ;;

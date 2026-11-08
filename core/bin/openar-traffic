@@ -1,0 +1,38 @@
+#!/system/bin/sh
+# openar-traffic -- per-interface byte counters and rates from /proc/net/dev.
+# Output: one line per interface: "<iface> <rx_bytes> <tx_bytes> <in_Bps> <out_Bps>".
+# The previous sample is kept in var/run/traffic.sample; the first call after a boot has no rate.
+OPENAR_ROOT=${OPENAR_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
+. "$OPENAR_ROOT/lib/openar-platform.sh"
+SAMPLE=$OPENAR_ROOT/var/run/traffic.sample
+now=$(date +%s)
+# Only interfaces a router cares about: USB/RNDIS, Wi-Fi, hotspot, Ethernet, mobile data.
+# Everything else in /proc/net/dev is a tunnel or vendor virtual interface (epdg, gre, rmnet_ipa...).
+cur=$(awk 'NR > 2 {
+    gsub(":", "")
+    if ($1 !~ /^(usb[0-9]+|rndis[0-9]+|wlan[0-9]+|swlan[0-9]+|ap[0-9]+|eth[0-9]+|rmnet[0-9]+|ccmni[0-9]+|pdp_ip[0-9]+|wwan[0-9]+|radio[0-9]+)$/) next
+    print $1, $2, $10
+}' /proc/net/dev)
+out=""; newsample=""
+while read -r iface rx tx; do
+    [ -n "$iface" ] || continue
+    case "$iface" in ''|*[!a-zA-Z0-9_@.-]*) continue ;; esac
+    line=$(grep -m1 "^$iface " "$SAMPLE" 2>/dev/null)
+    if [ -n "$line" ]; then
+        set -- $line; prx=$2; ptx=$3; pts=$4
+        dt=$((now - pts)); [ "$dt" -ge 1 ] || dt=1
+        in_bps=$(( (rx - prx) / dt )); out_bps=$(( (tx - ptx) / dt ))
+        [ "$in_bps" -ge 0 ] || in_bps=0
+        [ "$out_bps" -ge 0 ] || out_bps=0
+    else
+        in_bps=0; out_bps=0
+    fi
+    out="$out$iface $rx $tx $in_bps $out_bps
+"
+    newsample="$newsample$iface $rx $tx $now
+"
+done <<EOF
+$cur
+EOF
+printf '%s' "$newsample" > "$SAMPLE" 2>/dev/null
+printf '%s' "$out"

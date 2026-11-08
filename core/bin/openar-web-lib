@@ -6,6 +6,7 @@ OPENAR_ROOT=${OPENAR_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
 . "$OPENAR_ROOT/lib/openar-platform.sh"
 MEDIA=/luci-static/bootstrap
 MENU="/cgi-bin/view/status.cgi|Status
+/cgi-bin/view/clients.cgi|Clients
 /cgi-bin/view/services.cgi|Services
 /cgi-bin/view/commands.cgi|Commands
 /cgi-bin/view/sms.cgi|SMS

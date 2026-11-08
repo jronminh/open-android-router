@@ -64,6 +64,7 @@ if [ "$mode" = shell ]; then
     }
     page "web root" "/"
     page "status.cgi" "/cgi-bin/view/status.cgi"
+    page "clients.cgi" "/cgi-bin/view/clients.cgi"
     page "services.cgi" "/cgi-bin/view/services.cgi"
     page "commands.cgi" "/cgi-bin/view/commands.cgi"
     page "sms.cgi" "/cgi-bin/view/sms.cgi"
@@ -97,6 +98,7 @@ else
         }
         page "web root" "/"
         page "status.cgi" "/cgi-bin/view/status.cgi"
+        page "clients.cgi" "/cgi-bin/view/clients.cgi"
         page "services.cgi" "/cgi-bin/view/services.cgi"
         page "commands.cgi" "/cgi-bin/view/commands.cgi"
         page "sms.cgi" "/cgi-bin/view/sms.cgi"

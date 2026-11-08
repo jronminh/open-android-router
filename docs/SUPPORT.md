@@ -95,6 +95,14 @@ fail, so the Sharp/S21 results are the ones that count.
 - No boot persistence without root (shell mode starts over ADB; Magisk service or a boot hook can
   start it on rooted devices).
 - `dumpsys` field names differ by vendor/version; blocks print `n/a` instead of pretending.
+- Clients = the ARP/ND neighbour table (`ip neigh`); Android does not export DHCP leases to a
+  shell, so a client appears after its first packet and IPv6 neighbours are listed too.
+- Traffic = `/proc/net/dev` counters since boot, with the rate measured between page loads; only
+  USB/RNDIS/Wi-Fi/hotspot/Ethernet/mobile interfaces are shown, and rows with no traffic are hidden.
+- Mobile data **control** is root-only: `svc data` hangs for uid shell on the tested devices
+  (measured 2026-11-08) instead of failing, so `openar-data` refuses with exit 3 when not root.
+  Reading the state (`data-state`) works rootless. Tether `apply` is root-only for the same
+  reason; Wi-Fi on/off works rootless (tested).
 - SMS needs an SMS content provider (the Sharp 701SH has none, the page reports the provider error).
   One part per message (160 ASCII / 70 non-ASCII); shortcodes (1-5 digits) are refused because
   Android shows a premium-SMS confirmation dialog for them. The send path is implemented but was not

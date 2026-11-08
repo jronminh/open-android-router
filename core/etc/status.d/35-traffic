@@ -1,0 +1,16 @@
+#!/system/bin/sh
+# title: Traffic
+# status block: per-interface byte counters and the rate since the previous page load.
+# Interfaces with no traffic at all are hidden; they are usually fresh virtual PDN interfaces.
+section_begin "Traffic"; table_begin
+out=$("$OPENAR_ROOT/bin/openar-traffic" 2>/dev/null)
+if [ -n "$out" ]; then
+    echo '<tr class="tr table-titles"><th class="th">Interface</th><th class="th">In</th><th class="th">Out</th><th class="th">Rate in / out</th></tr>'
+    print -r -- "$out" | awk '{
+        if ($2 + $3 == 0) next
+        printf "<tr class=\"tr\"><td class=\"td left\"><code>%s</code></td><td class=\"td left\">%.1f MB</td><td class=\"td left\">%.1f MB</td><td class=\"td left\">%.2f / %.2f Mbps</td></tr>\n", $1, $2/1048576, $3/1048576, $4*8/1000000, $5*8/1000000
+        n++
+    }
+    END { if (n == 0) print "<tr class=\"tr\"><td class=\"td left\" colspan=\"4\"><i>(no traffic yet)</i></td></tr>" }'
+fi
+table_end; section_end

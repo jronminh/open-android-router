@@ -1,0 +1,10 @@
+#!/system/bin/sh
+# openar-data -- mobile data on/off for the command list.
+# "svc data" does not fail cleanly for uid shell on the tested devices: it hangs until killed
+# (measured on Sharp 701SH, 2026-11-08). So refuse there and only run it as root.
+case "${1:-}" in
+    enable|disable) ;;
+    *) echo "usage: openar-data enable|disable" >&2; exit 64 ;;
+esac
+[ "$(id -u)" = 0 ] || { echo "mobile data control needs root (svc data hangs for uid shell)"; exit 3; }
+svc data "$1"
