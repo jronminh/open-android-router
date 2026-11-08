@@ -121,6 +121,7 @@ docs/        ARCHITECTURE.md
 
 - [AGENTS.md](AGENTS.md): how we work -- environment, floor rules, definition of done.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): layers, modes, capability matrix, security model.
+- [docs/OPENWRT.md](docs/OPENWRT.md): what of OpenWrt runs on Android as-is, what needs a port, what not to carry over.
 - [devices/generic/README.md](devices/generic/README.md): what a device pack can override.
 
 ## License
