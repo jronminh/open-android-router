@@ -3,9 +3,9 @@
 Turn an Android phone into a small network device -- USB tethering / hotspot as the uplink --
 with a web UI that works **without root**, and takes advantage of root when it is there.
 
-Status: **0.1, early**. The tree came out of a personal project (S21Net, a Galaxy S21 FE acting
-as a 4G router); this repository keeps only the device-agnostic parts: web UI, native command
-layer, platform layer, deployment and checks. Device specifics live in `devices/`.
+Status: **0.1, early**. The tree came out of a personal Android router project; this repository
+keeps only the device-agnostic parts: web UI, native command layer, platform layer, deployment and
+checks. Device specifics live in `devices/`.
 
 ## What works
 
@@ -31,6 +31,11 @@ layer, platform layer, deployment and checks. Device specifics live in `devices/
 
 The capability differences are detected at runtime by `core/lib/openar-platform.sh`; nothing
 in `core/` may assume root. A feature that needs root must say so and degrade cleanly.
+
+The URL is normally the device IP (or `adb forward` + `127.0.0.1`). A friendly name is optional:
+`names="openar.lan"` in `etc/web.conf` publishes it through the tether DNS, so
+`http://openar.lan:8080/` works; that needs root plus Magisk's systemless hosts and is ignored
+elsewhere. The act zone accepts the name as `Host` too.
 
 ## Busybox first (the portability contract)
 

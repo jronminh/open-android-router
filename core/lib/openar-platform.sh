@@ -53,9 +53,17 @@ openar_conf() {
     ifaces=""; [ "$OPENAR_MODE" = root ] && ifaces="usb0 swlan0"
     [ "$OPENAR_MODE" = shell ] && ifaces="lo"
     port=80; [ "$OPENAR_MODE" = shell ] && port=8080
+    names=""
     [ -f "$OPENAR_ROOT/etc/web.conf" ] && . "$OPENAR_ROOT/etc/web.conf"
     OPENAR_IFACES=$ifaces
     OPENAR_PORT=$port
+    OPENAR_NAMES=$names
+}
+
+# Friendly names (etc/web.conf: names="openar.lan") need the tether DNS. That only exists for a
+# rooted box with Magisk's systemless hosts; elsewhere the caller skips the feature and says so.
+openar_hosts_file() {
+    echo "${OPENAR_HOSTS:-/data/adb/modules/hosts/system/etc/hosts}"
 }
 
 oip() {

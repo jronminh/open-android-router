@@ -30,10 +30,33 @@ VERBS="status start stop restart reload"
 # Resolved once, at the top: the respawn loop re-executes this script and never runs prepare().
 OPENAR_BUSYBOX_PATH=$(openar_busybox)
 BB=$OPENAR_BUSYBOX_PATH
+NAMES=$OPENAR_NAMES
+HOSTS=$(openar_hosts_file)
 
 log() { echo "openar-web: $*" >> "$LOG"; olog "web: $*"; }
 alive() { [ -n "${1:-}" ] && kill -0 "$1" 2>/dev/null; }
 get() { cat "$RUN/$1" 2>/dev/null; }
+
+# dns_update: publish "names=" from etc/web.conf as "<ip> <name>" lines in the hosts file that the
+# tether's dnsmasq reads (Magisk "Systemless hosts" provides it). Root only; a shell box says so
+# once and moves on. A name is convenient, an IP always works -- this never blocks the server.
+dns_update() {
+    [ -n "$NAMES" ] || return 0
+    [ "$OPENAR_MODE" = root ] || return 0
+    [ -f "$HOSTS" ] || { log "dns: $HOSTS missing (Magisk systemless hosts?); name not published"; return 0; }
+    want=""
+    for i in $OPENAR_IFACES; do
+        a=$(oip "$i"); [ -n "$a" ] || continue
+        for n in $NAMES; do want="$want$a $n # openar
+"; done
+    done
+    cur=$(grep ' # openar$' "$HOSTS"; echo .); cur=${cur%.}
+    [ "$cur" = "$want" ] && return 0
+    { grep -v ' # openar$' "$HOSTS"; print -nr -- "$want"; } > "$RUN/hosts.new" && cat "$RUN/hosts.new" > "$HOSTS" && rm -f "$RUN/hosts.new"
+    # busybox pkill -x does not match dnsmasq on this Android (measured 2026-11-08); killall does.
+    "$BB" killall -HUP dnsmasq 2>/dev/null
+    log "dns: $(print -nr -- "$want" | sed 's/ # openar//' | tr '\n' ';') (dnsmasq HUP)"
+}
 
 prepare() {
     [ -n "$BB" ] || { echo "openar-web: no busybox with httpd found (set OPENAR_BUSYBOX or put one in bin/busybox)" >&2; return 1; }
@@ -81,6 +104,7 @@ tick() {
         [ "$now" -ge "$(get "$i.next" || echo 0)" ] || continue
         start_instance "$i" "$ip"
     done
+    dns_update
     if [ -f "$LOG" ] && [ "$(wc -c < "$LOG")" -gt 262144 ]; then mv -f "$LOG" "$LOG.1"; fi
 }
 
@@ -117,6 +141,7 @@ do_status() {
     s=$(get supervisor.pid)
     if alive "$s"; then echo "supervisor=$s"; else echo "supervisor=none"; fi
     echo "mode=$OPENAR_MODE port=$OPENAR_PORT"
+    echo "names=${NAMES:-none}"
     for i in $OPENAR_IFACES; do
         p=$(get "$i.pid"); st=down
         alive "$p" && st=up

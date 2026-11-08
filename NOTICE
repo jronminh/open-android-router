@@ -11,6 +11,6 @@ core/etc/www/luci-static/bootstrap/:
 busybox (used at runtime, not shipped here) is GPL-2.0; obtain it from your device's Magisk
 installation or your own build. It is invoked as a separate program, not linked into this code.
 
-The project started as a personal Android network-device project (S21Net) for a Galaxy S21 FE;
-this repository is the generic, rootless-first extraction of the parts that fit any Android
-device: the web UI, the native-command layer and the platform layer.
+The project started as a personal Android network-device project; this repository is the generic,
+rootless-first extraction of the parts that fit any Android device: the web UI, the
+native-command layer and the platform layer.

@@ -53,7 +53,7 @@ if [ "$mode" = shell ]; then
         echo "openar: busybox from --busybox"
     fi
     adb -s "$serial" shell "cd $target.tmp || exit 1
-for f in etc/httpd.conf etc/commands etc/web.conf; do [ -f $target/\$f ] && cp -a $target/\$f \$f; done
+for f in etc/httpd.conf etc/commands etc/web.conf bin/busybox; do [ -f $target/\$f ] && cp -a $target/\$f \$f; done
 if [ -d $target/var ]; then rm -rf var; cp -a $target/var .; fi
 chmod 755 bin/* 2>/dev/null
 chmod 755 etc/www/cgi-bin/*/*.cgi 2>/dev/null
@@ -83,7 +83,7 @@ T=$target
 rm -rf \$T.new
 mkdir -p \$T.new
 tar xzf /data/local/tmp/openar.tgz -C \$T.new || exit 1
-for f in etc/httpd.conf etc/commands etc/web.conf; do
+for f in etc/httpd.conf etc/commands etc/web.conf bin/busybox; do
     [ -f \$T/\$f ] && cp -a \$T/\$f \$T.new/\$f
 done
 [ -d \$T/var ] && { rm -rf \$T.new/var; cp -a \$T/var \$T.new/var; }

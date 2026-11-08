@@ -69,6 +69,10 @@ private DNS are not used by core, because they do not exist on the floor (Androi
 - Pages: Status (blocks), Commands (list), Logs. Each page sends its frame immediately; blocks
   load in parallel through `cgi-bin/view/block.cgi`, like LuCI's "Loading view..." spinner.
 - The treeless URL `/` is a redirect; `openar.js` fills `data-block`/`data-cmd` placeholders.
+- Optional friendly names (`names="openar.lan"` in `etc/web.conf`) are written as `<ip> <name>`
+  lines into the hosts file the tether dnsmasq reads, with a SIGHUP afterwards; root plus Magisk
+  systemless hosts only. The act zone accepts those names as `Host` as well (still safe against
+  DNS rebinding: a rebinding page carries the attacker's own name).
 
 ## Commands
 
@@ -106,7 +110,6 @@ a second POST with `confirm=yes` executes; every act run appends to `var/log/act
 
 ## Roadmap
 
-- Device packs for the S21 FE (root: tether/profile intent, boot hook) and the Sharp 701SH
-  (rootless reference).
+- More device packs: `g990e` is the reference; the S10 (`g970w`) and the 701SH go next.
 - Service abstraction (start/stop/status/apply) once there is more than one service.
-- Optional DNS name for the UI (needs systemless hosts; root only, off by default).
+- Boot persistence for rooted devices (Magisk service) -- deliberately not ported yet.

@@ -19,6 +19,9 @@ for i in $OPENAR_IFACES; do
     a=$(oip "$i")
     [ -n "$h" ] && [ -n "$a" ] && [ "$h" = "$a" ] && mine=1
 done
+# ... or one of the names this phone publishes (etc/web.conf names=, served by the tether DNS).
+# Still safe against DNS rebinding: a rebinding page carries the attacker's own name as Host.
+for n in $OPENAR_NAMES; do [ -n "$h" ] && [ "$h" = "$n" ] && mine=1; done
 [ $mine = 1 ] || deny "Host is not one of this device's addresses"
 src=${HTTP_ORIGIN:-${HTTP_REFERER:-}}
 [ -n "$src" ] || deny "missing Origin/Referer"

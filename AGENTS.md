@@ -8,8 +8,8 @@ the workflow contract, kept short. Change it when the way we work changes.
 - One shell tree (`core/`) that turns an Android phone into a small network device with a web UI.
 - Two modes from one tree: **root** and **plain shell**. The plain shell is the floor.
 - Device specifics belong in `devices/<name>/`; `core/` stays device-agnostic.
-- The old personal S21Net repository is the origin story, not a dependency. Never copy its
-  device secrets, keys or evidence into here.
+- The original personal repository is the origin story, not a dependency. Never copy its device
+  secrets, keys or evidence into here.
 
 ## Environment
 

@@ -4,3 +4,7 @@
 # to the network; add "wlan0" only if you want the UI reachable from that network.
 ifaces="lo"
 port=8080
+# Friendly names (optional): every name is published as "<ip> <name>" in the hosts file the tether
+# dnsmasq reads, so the UI answers at http://openar.lan:8080/ as well as by IP. Root + Magisk
+# "Systemless hosts" only; ignored elsewhere. The act zone accepts these names as Host too.
+names=""

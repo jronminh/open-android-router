@@ -5,5 +5,4 @@
 section_begin "Battery"; table_begin
 kv "Level / status / temperature" "dumpsys battery 2>/dev/null | grep -E '^  (level|status|temperature):' || echo n/a"
 kv "Power" "dumpsys battery 2>/dev/null | grep -m1 -E '^  (USB powered|AC powered):' || echo n/a"
-kv "Charge limit" "settings get global protect_battery 2>/dev/null | sed 's/^null$/n/a/'"
 table_end; section_end

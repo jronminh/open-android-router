@@ -33,8 +33,7 @@ setDarkMode(mediaQuery);
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="$MEDIA/cascade.css">
 <link rel="stylesheet" media="only screen and (max-device-width: 854px)" href="$MEDIA/mobile.css">
-<link rel="icon" href="$MEDIA/logo_48.png" sizes="48x48">
-<link rel="icon" href="$MEDIA/logo.svg" sizes="any">
+<link rel="icon" href="/openar.svg" type="image/svg+xml">
 <style>form.inline { display: inline; margin: 0 .25em 0 0; } td.td pre { margin: 0; }</style>
 </head>
 <body class="lang_en">

@@ -64,7 +64,7 @@ applets are fine; `deploy.sh` prints any missing applet.
 |---|---|---|---|---|---|---|
 | SHARP 701SH | 10 | enforcing | shell | 8080 | PASS 2026-11-08 | no SMS provider, no `secims`, Wi-Fi only |
 | Samsung SM-G970W (S10) | 12 | **permissive** | shell | 8081 | PASS 2026-11-08 | 8080 already taken by another app; permissive can hide permission bugs |
-| Samsung SM-G990E (S21 FE) | 15 | enforcing | root (Magisk) | 8080 | PASS 2026-11-08 | production uplink; the reference for root mode |
+| Samsung SM-G990E (S21 FE) | 15 | enforcing | root (Magisk) | 8080 | PASS 2026-11-08 | production uplink; root-mode reference; `openar.lan` verified |
 
 Enforcing devices are the referee: a permissive device (S10) can pass where an enforcing one would
 fail, so the Sharp/S21 results are the ones that count.
@@ -84,4 +84,7 @@ fail, so the Sharp/S21 results are the ones that count.
 - `dumpsys` field names differ by vendor/version; blocks print `n/a` instead of pretending.
 - `airplane` uses `settings` + `am broadcast` (no `cmd`); verified on Android 10 (Sharp) and 12 (S10),
   unverified on 13+ where the framework may restrict broadcasts.
+- Friendly names (`names="openar.lan"` in `etc/web.conf`) need root plus Magisk systemless hosts;
+  verified on Android 15 (S21 FE, `http://openar.lan:8080/` 200). Shell mode ignores them and the
+  IP keeps working.
 - Android 6.0-9 is not verified yet.
