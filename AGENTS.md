@@ -47,9 +47,9 @@ capability matrix instead of merging it silently.
    needs root and degrade cleanly. `tools/check.sh --mode shell` must pass. The floor is
    **Android 6.0**; do not add a tool or a flag that only exists in a newer AOSP (no `cmd`,
    no private DNS in core).
-2. **Node target.** Assume a device already turned into a dn-cluster node (G48/G49): stock
-   firmware, consumer packages removed over adb (no Settings, launcher, SystemUI, WebView,
-   telephony, media providers), a small device owner for HOME/policy, screen off, master over ADB.
+2. **Node target.** Assume a device already turned into a headless node: stock firmware, the
+   consumer surface removed over adb (no Settings, launcher, SystemUI, WebView, telephony, media
+   providers), a small device owner for HOME/policy, screen off, master over ADB.
    Never depend on those packages: ADB + the web UI are the only surfaces, and every block/command
    degrades to `n/a` when its source is trimmed away. An app is allowed only as a passive actuator
    when the framework demands one (the `nodeapp` shape), never as the product.

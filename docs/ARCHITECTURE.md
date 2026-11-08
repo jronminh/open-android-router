@@ -63,10 +63,10 @@ private DNS are not used by core, because they do not exist on the floor (Androi
 
 ## Target: a node, not a phone
 
-The device is expected to be a **dn-cluster node**: stock firmware, then the consumer surface
-removed over adb (G48) -- on the reference 701SH about 52 packages survive, with no launcher,
+The device is expected to be a **headless node**: stock firmware, then the consumer surface
+removed over adb -- on the reference 701SH about 52 packages survive, with no launcher,
 keyboard, Settings, SystemUI, telephony, Bluetooth, WebView, MTP, media or contacts provider.
-A small device owner (G49) provides HOME and policy, the screen is off, and a master controls the
+A small device owner provides HOME and policy, the screen is off, and a master controls the
 node over ADB.
 
 openar must run in that state:

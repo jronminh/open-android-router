@@ -146,7 +146,7 @@ core/        the runnable tree: bin/ lib/ etc/ var/
 platform/    deployment defaults per mode: root/ and shell/
 devices/     per-device packs (extra config, command lists, status blocks)
 tools/       build_tree.sh, deploy.sh, check.sh
-docs/        ARCHITECTURE.md
+docs/        ARCHITECTURE.md, SUPPORT.md and the research notes (OPENWRT*, PLUGINS, LIBC, IDEAS)
 ```
 
 ## Rules of the project
