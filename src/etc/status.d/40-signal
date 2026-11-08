@@ -1,0 +1,7 @@
+#!/system/bin/sh
+# title: Signal
+# status block: LTE radio measurements; more than one carrier bandwidth means carrier aggregation.
+section_begin "Signal"; table_begin
+kv "LTE radio" "dumpsys telephony.registry 2>/dev/null | grep -m1 -oE 'mLte=CellSignalStrengthLte: [^,]*' | tr ' ' '\n' | grep -E '^(rssi|rsrp|rsrq|rssnr|level)='"
+kv "Carrier bandwidths (kHz)" "dumpsys telephony.registry 2>/dev/null | grep -m1 -oE 'mCellBandwidths=\[[^]]*\]'"
+table_end; section_end

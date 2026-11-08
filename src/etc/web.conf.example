@@ -1,0 +1,6 @@
+# Interfaces to serve and the port. One busybox httpd instance per interface IP; never 0.0.0.0.
+# Defaults by mode: root -> ifaces="usb0 swlan0" port=80 ; plain shell -> ifaces="lo" port=8080.
+# Values here win. On a Wi-Fi-only device without root, "lo" plus "adb forward" exposes nothing
+# to the network; add "wlan0" only if you want the UI reachable from that network.
+ifaces="lo"
+port=8080

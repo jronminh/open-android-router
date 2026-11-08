@@ -1,0 +1,11 @@
+#!/system/bin/sh
+# title: Device
+# status block: model, build, uptime, memory, package count. Helpers: bin/openar-web-lib.
+section_begin "Device"; table_begin
+kv "Model" "getprop ro.product.model"
+kv "Build" "getprop ro.build.display.id"
+kv "Android" "getprop ro.build.version.release"
+kv "Uptime" "uptime"
+kv "Free RAM" "awk '/MemAvailable/{print \$2 \" kB\"}' /proc/meminfo"
+kv "Disabled packages" "pm list packages -d 2>/dev/null | wc -l"
+table_end; section_end

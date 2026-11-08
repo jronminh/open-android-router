@@ -1,0 +1,6 @@
+#!/system/bin/sh
+# title: Web
+# status block: the web UI service itself.
+section_begin "Web"; table_begin
+kv "openar-web" "\"\$OPENAR_ROOT/bin/openar-web\" status"
+table_end; section_end

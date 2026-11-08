@@ -1,0 +1,6 @@
+# busybox httpd Basic auth: one password for the whole site, "path:user:password".
+# Keep this file outside the docroot with mode 0600, and change the password before use:
+#   cp etc/httpd.conf.example etc/httpd.conf
+#   vi etc/httpd.conf
+#   bin/openar-web reload
+/:admin:admin

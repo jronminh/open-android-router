@@ -1,0 +1,137 @@
+#!/system/bin/sh
+# openar-web -- the web UI service: one busybox httpd per interface IP, respawned like procd.
+#
+#   openar-web status    key=value: supervisor pid, per-interface ip/state/pid/crashes
+#   openar-web start     fork the supervisor (boot hook or manual); no-op when running
+#   openar-web stop      stop supervisor and every server instance
+#   openar-web restart   stop + start
+#   openar-web reload    SIGHUP the servers (busybox httpd re-reads etc/httpd.conf)
+#   openar-web verbs     list the verbs above
+#
+# Interfaces and port come from etc/web.conf (ifaces="usb0 swlan0", port=80); the defaults are
+# per mode: root serves usb0+swlan0 on :80, a plain shell box serves loopback on :8080.
+# Never 0.0.0.0: each instance binds one interface address, so nothing leaks to a network we
+# did not choose. busybox is not shipped in this repo: deploy it, or point OPENAR_BUSYBOX at one.
+#
+# Respawn follows procd (ref: openwrt procd service/instance.c): a server that dies within
+# THRESHOLD seconds counts as a crash; more than RETRY crashes stops respawning it.
+OPENAR_ROOT=${OPENAR_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
+. "$OPENAR_ROOT/lib/openar-platform.sh"
+openar_conf
+
+DOC=$OPENAR_ROOT/etc/www
+CONF=$OPENAR_ROOT/etc/httpd.conf
+RUN=$OPENAR_ROOT/var/run/web
+LOG=$OPENAR_ROOT/var/log/web.log
+SUPF=$RUN/supervisor.pid
+THRESHOLD=3600 TIMEOUT=5 RETRY=5 TICK=5
+VERBS="status start stop restart reload"
+
+# Resolved once, at the top: the respawn loop re-executes this script and never runs prepare().
+OPENAR_BUSYBOX_PATH=$(openar_busybox)
+BB=$OPENAR_BUSYBOX_PATH
+
+log() { echo "openar-web: $*" >> "$LOG"; olog "web: $*"; }
+alive() { [ -n "${1:-}" ] && kill -0 "$1" 2>/dev/null; }
+get() { cat "$RUN/$1" 2>/dev/null; }
+
+prepare() {
+    [ -n "$BB" ] || { echo "openar-web: no busybox with httpd found (set OPENAR_BUSYBOX or put one in bin/busybox)" >&2; return 1; }
+    [ -d "$DOC" ] || { echo "openar-web: missing $DOC" >&2; return 1; }
+    [ -f "$CONF" ] || { echo "openar-web: missing $CONF (no password -> refusing to serve; copy etc/httpd.conf.example)" >&2; return 1; }
+    mkdir -p "$RUN" "$OPENAR_ROOT/var/log"
+}
+
+stop_instance() {
+    p=$(get "$1.pid"); rm -f "$RUN/$1.pid" "$RUN/$1.ip"
+    alive "$p" && kill "$p" 2>/dev/null
+}
+
+start_instance() {
+    "$BB" httpd -f -p "$2:$OPENAR_PORT" -h "$DOC" -c "$CONF" -r OpenAR >> "$LOG" 2>&1 &
+    echo $! > "$RUN/$1.pid"; echo "$2" > "$RUN/$1.ip"; date +%s > "$RUN/$1.start"
+    log "start $1 $2:$OPENAR_PORT pid $!"
+}
+
+tick() {
+    now=$(date +%s)
+    for i in $OPENAR_IFACES; do
+        ip=$(oip "$i"); p=$(get "$i.pid")
+        [ -f "$RUN/$i.failed" ] && continue
+        if alive "$p"; then
+            if [ "$ip" != "$(get "$i.ip")" ]; then
+                stop_instance "$i"; log "$i ip changed -> ${ip:-none}, instance stopped"
+            fi
+            continue
+        fi
+        if [ -n "$p" ]; then
+            rm -f "$RUN/$i.pid"
+            run=$(( now - $(get "$i.start" || echo "$now") ))
+            c=$(get "$i.count"); c=${c:-0}
+            if [ "$run" -lt "$THRESHOLD" ]; then c=$((c + 1)); else c=0; fi
+            echo "$c" > "$RUN/$i.count"
+            if [ "$c" -gt "$RETRY" ]; then
+                touch "$RUN/$i.failed"; log "$i crash loop: $c crashes, ${run}s since start; giving up"
+                continue
+            fi
+            echo $(( now + TIMEOUT )) > "$RUN/$i.next"
+            log "$i died after ${run}s (crash $c/$RETRY), respawn in ${TIMEOUT}s"
+        fi
+        [ -n "$ip" ] || continue
+        [ "$now" -ge "$(get "$i.next" || echo 0)" ] || continue
+        start_instance "$i" "$ip"
+    done
+    if [ -f "$LOG" ] && [ "$(wc -c < "$LOG")" -gt 262144 ]; then mv -f "$LOG" "$LOG.1"; fi
+}
+
+loop() {
+    echo $$ > "$SUPF"
+    trap 'for i in $OPENAR_IFACES; do stop_instance "$i"; done; [ "$(get supervisor.pid)" = "$$" ] && rm -f "$SUPF"; exit 0' TERM INT
+    log "supervisor begin (ifaces: ${OPENAR_IFACES:-none}, port $OPENAR_PORT, mode $OPENAR_MODE)"
+    while :; do tick; sleep "$TICK" & wait $!; done
+}
+
+do_start() {
+    prepare || exit 1
+    if alive "$(get supervisor.pid)"; then echo "openar-web: already running (pid $(get supervisor.pid))"; return 0; fi
+    [ -n "$OPENAR_IFACES" ] || { echo "openar-web: no interfaces configured (etc/web.conf: ifaces=...)" >&2; exit 1; }
+    for i in $OPENAR_IFACES; do rm -f "$RUN/$i".*; done
+    setsid "$0" --loop < /dev/null > /dev/null 2>&1 &
+    sleep 1; echo "openar-web: started (pid $(get supervisor.pid))"
+}
+
+do_stop() {
+    s=$(get supervisor.pid)
+    if alive "$s"; then
+        kill "$s"; n=0
+        while alive "$s" && [ $n -lt 20 ]; do sleep 0.5; n=$((n + 1)); done
+        alive "$s" && { kill -9 "$s"; echo "openar-web: supervisor $s killed (-9)"; }
+    fi
+    for i in $OPENAR_IFACES; do stop_instance "$i"; done
+    rm -f "$SUPF"; echo "openar-web: stopped"
+}
+
+do_status() {
+    openar_conf
+    s=$(get supervisor.pid)
+    if alive "$s"; then echo "supervisor=$s"; else echo "supervisor=none"; fi
+    echo "mode=$OPENAR_MODE port=$OPENAR_PORT"
+    for i in $OPENAR_IFACES; do
+        p=$(get "$i.pid"); st=down
+        alive "$p" && st=up
+        [ -f "$RUN/$i.failed" ] && st=failed
+        echo "$i.ip=$(oip "$i")"; echo "$i.state=$st"; echo "$i.pid=${p:-none}"; echo "$i.crashes=$(get "$i.count" || echo 0)"
+    done
+}
+
+OPENAR_BUSYBOX_PATH=$(openar_busybox)
+case "${1:-}" in
+    status)  do_status ;;
+    start)   do_start ;;
+    stop)    do_stop ;;
+    restart) do_stop; do_start ;;
+    reload)  for i in $OPENAR_IFACES; do p=$(get "$i.pid"); alive "$p" && kill -HUP "$p"; done; log "reload (SIGHUP)" ;;
+    verbs)   echo "$VERBS" ;;
+    --loop)  loop ;;
+    *) echo "usage: openar-web $(echo "$VERBS" | tr ' ' '|')" >&2; exit 64 ;;
+esac

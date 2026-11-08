@@ -1,0 +1,23 @@
+# openar command list -- tab-separated columns:
+#   id  section  group(auto|view|act)  confirm  timeout_s  param_regex  description  command
+# group "auto" loads by itself on the page (status at a glance), "view" is read-only and runs on
+# demand, "act" changes device state (web: POST + confirmation + log; ADB: openar-cmd run).
+# A parameter is appended as one quoted word; "-" means the command takes none.
+# The owner copy is etc/commands (same format) and wins over this default; edit both with vi.
+ifaces	Network	view	-	10	-	IPv4 addresses of all interfaces	ip -4 -o addr show
+routes	Network	view	-	10	-	Main routing table	ip route
+neigh	Network	view	-	10	-	Link-layer neighbours (devices seen)	ip neigh
+ping	Network	view	-	15	^[A-Za-z0-9.-]{1,253}$	Ping a host or IPv4 (3 packets)	ping -c 3 -W 2
+net	Network	auto	-	15	-	Default network	dumpsys connectivity | grep -m1 -oE 'Active default network: [^ ]+'
+tether	Network	auto	-	15	-	Tethered interfaces	count=$(dumpsys tethering | grep -c 'state=TETHERED'); echo tethered=$count
+usb-state	Network	auto	-	10	-	USB functions / state	getprop sys.usb.state
+dns	Network	auto	-	10	-	Private DNS mode	settings get global private_dns_mode
+dns-mode	Network	act	yes	15	^(off|opportunistic)$	Private DNS: off or automatic	settings put global private_dns_mode
+airplane-state	Network	auto	-	10	-	Airplane mode (0/1)	settings get global airplane_mode_on
+airplane	Network	act	yes	20	^(enable|disable)$	Airplane mode on/off	cmd connectivity airplane-mode
+wifi-state	Wireless	auto	-	10	-	Wi-Fi state	dumpsys wifi | grep -m1 'Wi-Fi is'
+wifi	Wireless	act	yes	20	^(enable|disable)$	Wi-Fi radio on/off	svc wifi
+uptime	System	auto	-	10	-	Uptime and load	uptime
+disk	System	auto	-	10	-	Space used on /data	df -h /data
+top	System	view	-	15	-	Top CPU processes	top -b -n 1 | head -12
+reboot	System	act	yes	15	-	Reboot the device	svc power reboot

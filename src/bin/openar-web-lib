@@ -1,0 +1,102 @@
+#!/system/bin/sh
+# openar-web-lib -- page frame and widgets for the CGI pages, in the LuCI Bootstrap look
+# (the theme files are Apache-2.0, see etc/www/luci-static/bootstrap/LICENSE). Sourced, never run.
+# No authentication here: busybox httpd does HTTP Basic for the whole site.
+OPENAR_ROOT=${OPENAR_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
+. "$OPENAR_ROOT/lib/openar-platform.sh"
+MEDIA=/luci-static/bootstrap
+MENU="/cgi-bin/view/status.cgi|Status
+/cgi-bin/view/commands.cgi|Commands
+/cgi-bin/view/logs.cgi|Logs"
+# mksh on Android: printf is an external command (~28 ms) while print -r is builtin.
+CRLF='
+'
+
+esc() { sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g'; }
+
+page_head() {
+    host=$(getprop ro.product.model)
+    print -nr -- "Content-Type: text/html; charset=utf-8$CRLF""Cache-Control: no-store$CRLF$CRLF"
+    cat <<EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OpenAR | $1</title>
+<script>
+var mediaQuery = window.matchMedia('(prefers-color-scheme: dark)'),
+    rootElement = document.querySelector(':root'),
+    setDarkMode = function(match) { rootElement.setAttribute('data-darkmode', match.matches) };
+mediaQuery.addEventListener('change', setDarkMode);
+setDarkMode(mediaQuery);
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="$MEDIA/cascade.css">
+<link rel="stylesheet" media="only screen and (max-device-width: 854px)" href="$MEDIA/mobile.css">
+<link rel="icon" href="$MEDIA/logo_48.png" sizes="48x48">
+<link rel="icon" href="$MEDIA/logo.svg" sizes="any">
+<style>form.inline { display: inline; margin: 0 .25em 0 0; } td.td pre { margin: 0; }</style>
+</head>
+<body class="lang_en">
+<header>
+<a class="brand" href="/">openar · $host</a>
+<ul class="nav" id="topmenu">
+EOF
+    print -r -- "$MENU" | while IFS='|' read -r url title; do
+        a=""; [ "$url" = "${SCRIPT_NAME:-}" ] && a=' class="active"'
+        echo "<li$a><a href=\"$url\">$title</a></li>"
+    done
+    cat <<EOF
+</ul>
+</header>
+<div id="maincontent" class="container">
+<h2 name="content">$1</h2>
+EOF
+}
+
+page_foot() {
+    cat <<EOF
+</div>
+<footer><span>openar · LuCI Bootstrap theme (Apache-2.0) · busybox httpd · $(getprop ro.build.display.id)</span></footer>
+<script src="/openar.js"></script>
+</body>
+</html>
+EOF
+}
+
+tab_current() {
+    t=$(print -nr -- "${QUERY_STRING:-}" | tr '&' '\n' | sed -n 's/^tab=//p' | head -1 | tr -cd '0-9')
+    echo "${t:-1}"
+}
+
+# tabmenu <current N> <label>...: LuCI tab bar; one plain link per tab, no JavaScript needed.
+tabmenu() {
+    _tm_cur=$1; shift; _tm_n=0
+    echo '<ul class="cbi-tabmenu">'
+    for _tm_l in "$@"; do
+        _tm_n=$((_tm_n + 1)); _tm_c=cbi-tab-disabled; [ "$_tm_n" = "$_tm_cur" ] && _tm_c=cbi-tab
+        echo "<li class=\"$_tm_c\"><a href=\"?tab=$_tm_n\">$_tm_l</a></li>"
+    done
+    echo '</ul>'
+}
+
+placeholder() { echo "<div class=\"cbi-section\" $1=\"$2\"><h3>$3</h3><p class=\"spinning\">Loading…</p></div>"; }
+section_begin() { echo "<div class=\"cbi-section\"><h3>$1</h3>"; }
+section_end() { echo '</div>'; }
+table_begin() { echo '<table class="table">'; }
+table_end() { echo '</table>'; }
+
+# kv <label> <shell command...>: one status row (the command output is escaped).
+kv() {
+    l=$1; shift
+    print -r -- "<tr class=\"tr\"><td class=\"td left\" width=\"33%\">$l</td><td class=\"td left\"><pre>$(eval "$@" 2>&1 | esc)</pre></td></tr>"
+}
+
+alert() { echo "<div class=\"alert-message $1\"><h4>$2</h4><p>$3</p></div>"; }
+
+act_button() {
+    label=$1; cls=$2; shift 2
+    print -nr -- '<form class="inline" method="post" action="/cgi-bin/act/run.cgi">'
+    for kvp in "$@"; do print -nr -- "<input type=\"hidden\" name=\"${kvp%%=*}\" value=\"${kvp#*=}\">"; done
+    print -nr -- "<button class=\"btn cbi-button-$cls\">$label</button></form>"
+}

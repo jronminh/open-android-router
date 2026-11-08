@@ -1,0 +1,16 @@
+open-android-router
+Copyright (C) 2026 the open-android-router authors
+
+Licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This product includes the LuCI Bootstrap theme, unmodified, under
+src/etc/www/luci-static/bootstrap/:
+  Copyright (C) 2008-2026 OpenWrt.org and contributors
+  Licensed under the Apache License, Version 2.0; the license text is kept in that directory.
+
+busybox (used at runtime, not shipped here) is GPL-2.0; obtain it from your device's Magisk
+installation or your own build. It is invoked as a separate program, not linked into this code.
+
+The project started as a personal Android network-device project (S21Net) for a Galaxy S21 FE;
+this repository is the generic, rootless-first extraction of the parts that fit any Android
+device: the web UI, the native-command layer and the platform layer.
