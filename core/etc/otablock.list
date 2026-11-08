@@ -1,0 +1,2 @@
+# Packages to keep disabled (one per line, '#' comments). Empty by default: a generic device
+# has no known OTA packages. Device packs ship the vendor list, e.g. Samsung's firmware updaters.

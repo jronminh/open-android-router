@@ -59,7 +59,7 @@ private DNS are not used by core, because they do not exist on the floor (Androi
 | interfaces default | `usb0 swlan0` | `lo` |
 | kernel log (`/dev/kmsg`) | written | skipped (`[ -w /dev/kmsg ]`) |
 | owner config | `etc/web.conf`, `etc/httpd.conf` | same |
-| boot durability | outside this tree (Magisk service / boot hook) | none |
+| boot durability | `/data/adb/service.d/openar-web.sh`, installed by `deploy.sh --root` | none |
 
 ## Target: a node, not a phone
 
@@ -117,7 +117,8 @@ start per call (the SMS query is ~1.3 s for that reason).
 ## Services
 
 A service is a script `bin/openar-<name>` with a `VERBS="..."` line and one `svc_<verb>` function
-per verb (`lib/openar-service.sh`). Read-only verbs are `status` (key=value lines) and `check`
+per verb (`lib/openar-service.sh`). Core ships `web`, `tether`, `radio`, `battery`, `wifi`,
+`adb` (rescue settings) and `otablock` (`etc/otablock.list` intent file). Read-only verbs are `status` (key=value lines) and `check`
 (exit 0 means "in line with intent", otherwise it prints `diff ...`). The services page lists every
 such script, loads `status`/`check` through `block.cgi?s=&v=`, and turns act verbs listed in
 `ACT_VERBS` into POST buttons to the act zone. Core ships `tether`, `radio`, `battery`, `wifi`

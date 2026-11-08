@@ -1,0 +1,25 @@
+#!/system/bin/sh
+# openar-adb -- keep ADB usable for the rescue path (headless node).
+# status/check read the settings; apply sets them. All are writable by uid shell (tested).
+OPENAR_ROOT=${OPENAR_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
+. "$OPENAR_ROOT/lib/openar-platform.sh"
+. "$OPENAR_ROOT/lib/openar-service.sh"
+VERBS="status check apply"
+svc_status() {
+    kv adb_enabled "$(settings get global adb_enabled)"
+    kv adb_allowed_connection_time "$(settings get global adb_allowed_connection_time)"
+    kv development_settings_enabled "$(settings get global development_settings_enabled)"
+}
+svc_check() {
+    rc=0
+    [ "$(settings get global adb_enabled)" = 1 ] || { echo "diff adb_enabled: not 1"; rc=1; }
+    [ "$(settings get global adb_allowed_connection_time)" = 0 ] || { echo "diff adb_allowed_connection_time: not 0"; rc=1; }
+    return $rc
+}
+svc_apply() {
+    settings put global development_settings_enabled 1
+    settings put global adb_enabled 1
+    settings put global adb_allowed_connection_time 0
+    say "adb enabled, authorization timeout disabled"
+}
+openar_dispatch "$@"

@@ -62,6 +62,11 @@ component from another system.
 - **SMS page**: inbox and sent through Android's SMS content provider, and a one-part send through
   the `isms` binder. Shortcodes (1-5 digits) are refused; the page needs an SMS provider.
 - **Logs page**: actions, web supervisor, openar log, crash buffer.
+- **ADB rescue and OTA block services**: `openar-adb` keeps ADB on with no authorization timeout
+  (the headless rescue path); `openar-otablock` disables the packages listed in
+  `etc/otablock.list` (empty by default; device packs ship the vendor list). Both work rootless.
+- **Boot persistence (root)**: `deploy.sh --root` installs `/data/adb/service.d/openar-web.sh`, so
+  the web UI comes back after a reboot or power loss. `--no-boot` skips it.
 - **No root needed** for: serving the UI, reading status, clients, traffic, mobile data *state*,
   registration, Wi-Fi on/off (tested), and most `settings` actions.
 - **Root only**: tether `apply`, mobile data on/off (`svc data` hangs for uid shell -- measured),
@@ -76,7 +81,7 @@ component from another system.
 | web port | 80 | 8080 |
 | default interfaces | `usb0 swlan0` | `lo` (use `adb forward`, or add `wlan0`) |
 | kernel log | yes | no (falls back to `var/log/openar.log`) |
-| durability across reboot | boot hook / Magisk service | none (start it over ADB) |
+| durability across reboot | Magisk `service.d` hook (installed by deploy) | none (start it over ADB) |
 
 The capability differences are detected at runtime by `core/lib/openar-platform.sh`; nothing
 in `core/` may assume root. A feature that needs root must say so and degrade cleanly.

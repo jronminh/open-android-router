@@ -13,9 +13,9 @@ set -eu
 [ -n "${MSYSTEM:-}" ] && export MSYS_NO_PATHCONV=1
 here=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 serial=${1:-}
-[ -n "$serial" ] || { echo "usage: deploy.sh <serial> [--root|--shell] [--pack generic] [--ifaces ...] [--port N] [--busybox PATH]" >&2; exit 64; }
+[ -n "$serial" ] || { echo "usage: deploy.sh <serial> [--root|--shell] [--pack generic] [--ifaces ...] [--port N] [--busybox PATH] [--no-boot]" >&2; exit 64; }
 shift
-mode=""; pack="generic"; ifaces=""; port=""; busybox=""
+mode=""; pack="generic"; ifaces=""; port=""; busybox=""; boot=""
 while [ $# -gt 0 ]; do
     case "$1" in
         --root) mode=root ;;
@@ -24,6 +24,7 @@ while [ $# -gt 0 ]; do
         --ifaces) ifaces=$2; shift ;;
         --port) port=$2; shift ;;
         --busybox) busybox=$2; shift ;;
+        --no-boot) boot=no ;;
         *) echo "unknown option: $1" >&2; exit 64 ;;
     esac
     shift
@@ -118,6 +119,16 @@ EOF
     adb -s "$serial" push "$tmpd_adb/install.sh" /data/local/tmp/openar-install.sh >/dev/null
     adb -s "$serial" shell "su -c 'sh /data/local/tmp/openar-install.sh'"
     adb -s "$serial" shell "rm -f /data/local/tmp/openar.tgz /data/local/tmp/openar-install.sh" || true
+    if [ "$boot" != no ]; then
+        cat > "$tmpd/openar-web.sh" <<EOF
+#!/system/bin/sh
+# openar: start the web UI at boot (root mode). Installed by tools/deploy.sh; remove to disable.
+$target/bin/openar-web start >/dev/null 2>&1
+EOF
+        adb -s "$serial" push "$tmpd_adb/openar-web.sh" /data/local/tmp/openar-web.sh >/dev/null
+        adb -s "$serial" shell "su -c 'mkdir -p /data/adb/service.d; cp /data/local/tmp/openar-web.sh /data/adb/service.d/openar-web.sh; chmod 755 /data/adb/service.d/openar-web.sh; rm -f /data/local/tmp/openar-web.sh'"
+        echo "openar: boot hook /data/adb/service.d/openar-web.sh"
+    fi
     rm -rf "$tmpd"
 fi
 

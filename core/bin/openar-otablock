@@ -1,0 +1,34 @@
+#!/system/bin/sh
+# openar-otablock -- disable the packages listed in etc/otablock.list (one per line, # comments).
+# The list is an intent file: empty by default, device packs ship the vendor's updater packages.
+# Shell can change package state over adb (pm disable-user), so this works without root.
+OPENAR_ROOT=${OPENAR_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}
+. "$OPENAR_ROOT/lib/openar-platform.sh"
+. "$OPENAR_ROOT/lib/openar-service.sh"
+VERBS="status check apply"
+LIST=$(intent otablock.list)
+svc_status() {
+    [ -f "$LIST" ] || { kv packages 0; return 0; }
+    grep -v '^#' "$LIST" | grep . | while read -r p; do
+        if pm list packages -d 2>/dev/null | grep -qx "package:$p"; then kv "$p" disabled; else kv "$p" enabled; fi
+    done
+}
+svc_check() {
+    [ -f "$LIST" ] || { echo "diff list: $LIST missing"; return 1; }
+    rc=0
+    for p in $(grep -v '^#' "$LIST" | grep .); do
+        pm list packages -d 2>/dev/null | grep -qx "package:$p" || { echo "diff $p: enabled"; rc=1; }
+    done
+    return $rc
+}
+svc_apply() {
+    [ -f "$LIST" ] || { say "no $LIST"; return 1; }
+    for p in $(grep -v '^#' "$LIST" | grep .); do
+        if pm list packages -d 2>/dev/null | grep -qx "package:$p"; then
+            say "$p already disabled"
+        else
+            pm disable-user --user 0 "$p" >/dev/null 2>&1 && say "$p disabled" || say "$p cannot be disabled"
+        fi
+    done
+}
+openar_dispatch "$@"

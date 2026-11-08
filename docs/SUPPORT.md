@@ -92,8 +92,13 @@ fail, so the Sharp/S21 results are the ones that count.
 
 ## Known limitations
 
-- No boot persistence without root (shell mode starts over ADB; Magisk service or a boot hook can
-  start it on rooted devices).
+- Boot persistence is root-only: `deploy.sh --root` installs `/data/adb/service.d/openar-web.sh`.
+  Shell mode starts over ADB and does not survive a reboot (by design).
+- `openar-adb apply` sets `adb_allowed_connection_time=0` (no re-authorization) because the node
+  must be reachable without a screen. That is a deliberate security trade-off for headless rescue.
+- `openar-otablock` reads `etc/otablock.list` (empty on a generic tree; `devices/g990e` ships
+  Samsung's two firmware updaters). It uses `pm disable-user` as shell, verified on the S10 with a
+  test package; a device owner's own package cannot be disabled this way.
 - `dumpsys` field names differ by vendor/version; blocks print `n/a` instead of pretending.
 - Clients = the ARP/ND neighbour table (`ip neigh`); Android does not export DHCP leases to a
   shell, so a client appears after its first packet and IPv6 neighbours are listed too.
