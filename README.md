@@ -33,6 +33,20 @@ no libc island, no plugin feed. Those are recorded in [docs/IDEAS.md](docs/IDEAS
 planned. New work should add a *device capability* or simplify the *management layer*, not a
 component from another system.
 
+## Philosophy
+
+- **Headless-first.** The phone needs no screen, launcher or Settings app. ADB and the web UI are
+  the setup and rescue paths; every control is a file in `etc/` or a command in `bin/`, so nothing
+  lives only in an app's UI. The tree keeps working with the screen off.
+- **Outside the app runtime.** There is no APK of ours, no zygote, no WebView and no long-lived app
+  process. The tree is shell scripts plus busybox httpd; if the app layer is broken or was never
+  installed, the web UI and ADB still serve.
+- **Honest about ART.** This is not an "ART-free" claim. `cmd`, `dumpsys`, `logcat`, `getprop`,
+  `service`, and (on both tested releases) `settings`/`pm`/`am` are native or thin wrappers around
+  native `cmd`. But `content` always runs through `app_process` (ART), and on Android 10 `svc` does
+  too. Those are stock, one-shot tools -- not an app of ours. Consequence: a broken system_server
+  breaks framework actions (SMS read, some `svc` verbs) while the web/ADB rescue path stays up.
+
 ## What works
 
 - **Status page**: device, battery, network interfaces, cellular signal, and the web service

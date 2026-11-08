@@ -61,6 +61,28 @@ private DNS are not used by core, because they do not exist on the floor (Androi
 | owner config | `etc/web.conf`, `etc/httpd.conf` | same |
 | boot durability | outside this tree (Magisk service / boot hook) | none |
 
+## Runtime boundaries (headless, app-free)
+
+The tree runs as ordinary shell processes under adbd/init. It deliberately requires no APK of its
+own, no zygote and no WebView: the web UI is static HTML + CGI served by busybox httpd, so it keeps
+answering with the screen off or the app layer broken. This is the rescue invariant: ADB and the
+web UI must not depend on an app we ship.
+
+"Independent of ART" is not literally true, and the documentation says so. Measured on Sharp
+(Android 10) and S21 (Android 15):
+
+| command | implementation | ART? |
+|---|---|---|
+| `cmd`, `dumpsys`, `logcat`, `getprop`, `service` | native binaries | no |
+| `settings`, `pm` | shell wrapper -> `cmd settings` / `cmd package` | no |
+| `am` (except `am instrument`) | shell wrapper -> `cmd activity` | no |
+| `content` | `app_process content.jar` | **yes, every call** |
+| `svc` | Android 10: `app_process svc.jar`; Android 15: wrapper -> `cmd` | 10: yes, 15: no |
+
+Consequence: a broken `system_server` breaks framework actions (SMS read, some `svc` verbs, any
+`cmd` call) while ADB and the web UI stay up. The cost of the ART-backed tools is a one-shot runtime
+start per call (the SMS query is ~1.3 s for that reason).
+
 ## Web layer
 
 - `busybox httpd` per interface address from `etc/web.conf`; a supervisor loop keeps them up
